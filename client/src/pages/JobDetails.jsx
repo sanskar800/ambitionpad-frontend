@@ -1,0 +1,256 @@
+import React from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { useJobs } from '../hooks/useJobs';
+
+const JobDetail = () => {
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const { jobs, loading, error } = useJobs();
+
+    // Find the specific job
+    const job = jobs?.find(job => job._id === id) || null;
+
+    const handleApplyNow = () => {
+        if (job?.applyNowLink) {
+            window.open(job.applyNowLink, '_blank');
+        }
+    };
+
+    const handleBackToJobs = () => {
+        navigate('/jobs');
+    };
+
+    // Extract company name from description or use fallback
+    const getCompanyName = (job) => {
+        if (job?.companyName) return job.companyName;
+        if (job?.company) return job.company;
+
+        // Try to extract company name from description
+        if (job?.description) {
+            const lines = job.description.split('\n').filter(line => line.trim());
+            if (lines.length > 0) {
+                const firstLine = lines[0].trim();
+                // Check if first line looks like a company name
+                if (firstLine.length < 100 &&
+                    !firstLine.toLowerCase().startsWith('we are looking') &&
+                    !firstLine.toLowerCase().startsWith('job description') &&
+                    !firstLine.toLowerCase().startsWith('about the role') &&
+                    !firstLine.toLowerCase().startsWith('who we are')) {
+                    return firstLine;
+                }
+            }
+        }
+
+        return 'Company Name Not Available';
+    };
+
+    // Format description with proper line breaks and sections
+    const formatDescription = (description) => {
+        if (!description) return '';
+
+        // Split by double line breaks to create paragraphs
+        const paragraphs = description.split('\n\n').filter(p => p.trim());
+
+        return paragraphs.map((paragraph, index) => {
+            // Check if it's a section header (short line that might be a title)
+            if (paragraph.length < 100 && !paragraph.includes('.') && paragraph.trim().endsWith(':')) {
+                return (
+                    <h3 key={index} className="text-lg font-semibold text-gray-900 mt-6 mb-3">
+                        {paragraph.trim()}
+                    </h3>
+                );
+            }
+
+            // Regular paragraph
+            const lines = paragraph.split('\n');
+            return (
+                <div key={index} className="mb-4">
+                    {lines.map((line, lineIndex) => (
+                        <p key={lineIndex} className="text-gray-700 mb-2">
+                            {line.trim()}
+                        </p>
+                    ))}
+                </div>
+            );
+        });
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 py-12">
+                <div className="container mx-auto px-4">
+                    <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-8 animate-pulse">
+                        <div className="h-8 bg-gray-200 rounded w-1/2 mb-6"></div>
+                        <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
+                        <div className="h-4 bg-gray-200 rounded w-full mb-4"></div>
+                        <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+                        <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
+                        <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                        <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                        <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                        <div className="h-4 bg-gray-200 rounded w-3/4 mb-8"></div>
+                        <div className="h-12 bg-gray-200 rounded w-full mt-8"></div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gray-50 py-12">
+                <div className="container mx-auto px-4">
+                    <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-8 text-center">
+                        <p className="text-red-500 text-lg mb-4">Error loading job details: {error}</p>
+                        <button
+                            onClick={handleBackToJobs}
+                            className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                            Back to Jobs
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (!job) {
+        return (
+            <div className="min-h-screen bg-gray-50 py-12">
+                <div className="container mx-auto px-4">
+                    <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-8 text-center">
+                        <p className="text-gray-500 text-lg mb-4">Job not found</p>
+                        <button
+                            onClick={handleBackToJobs}
+                            className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                            Back to Jobs
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    const companyName = getCompanyName(job);
+
+    return (
+        <div className="min-h-screen bg-gray-50 py-12">
+            <div className="container mx-auto px-4">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden"
+                >
+                    <div className="p-8">
+                        {/* Back Button */}
+                        <button
+                            onClick={handleBackToJobs}
+                            className="flex items-center text-blue-600 hover:text-blue-700 mb-6 transition-colors"
+                        >
+                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                            </svg>
+                            Back to Jobs
+                        </button>
+
+                        {/* Header Section */}
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                            <div className="flex items-start space-x-4">
+                                {/* Company Logo */}
+                                {job.companyImage && (
+                                    <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center flex-shrink-0">
+                                        <img
+                                            src={job.companyImage}
+                                            alt="Company Logo"
+                                            className="w-full h-full object-contain"
+                                            onError={(e) => {
+                                                e.target.style.display = 'none';
+                                            }}
+                                        />
+                                    </div>
+                                )}
+
+                                <div>
+                                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                                        {job.jobTitle || 'Job Title Not Available'}
+                                    </h1>
+                                    <p className="text-xl text-gray-600 mb-2">{companyName}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Job Details */}
+                        <div className="flex flex-wrap gap-6 mb-8 p-4 bg-gray-50 rounded-lg">
+                            <div className="flex items-center text-gray-600">
+                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                <span>{job.region || 'Location Not Specified'}</span>
+                            </div>
+
+                            <div className="flex items-center text-gray-600">
+                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0H8m8 0v2a2 2 0 01-2 2H10a2 2 0 01-2-2V6m8 0H8"></path>
+                                </svg>
+                                <span>{job.jobType || 'Full Time'}</span>
+                            </div>
+
+                            {job.neededExperience && (
+                                <div className="flex items-center text-gray-600">
+                                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span>{job.neededExperience}</span>
+                                </div>
+                            )}
+
+                            {job.salary && job.salary !== 'N/A' && (
+                                <div className="flex items-center text-gray-600">
+                                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span>{job.salary}</span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Job Description */}
+                        <div className="prose max-w-none mb-8">
+                            <h2 className="text-2xl font-bold text-gray-900 mb-6">Job Description</h2>
+                            <div className="text-gray-700 leading-relaxed">
+                                {formatDescription(job.description)}
+                            </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+                            <button
+                                onClick={handleApplyNow}
+                                className="flex-1 px-8 py-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-md flex items-center justify-center"
+                            >
+                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                </svg>
+                                Apply Now
+                            </button>
+                            <button
+                                onClick={handleBackToJobs}
+                                className="flex-1 px-8 py-4 bg-white text-blue-600 font-semibold rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-colors flex items-center justify-center"
+                            >
+                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                                </svg>
+                                Back to Jobs
+                            </button>
+                        </div>
+                    </div>
+                </motion.div>
+            </div>
+        </div>
+    );
+};
+
+export default JobDetail;
