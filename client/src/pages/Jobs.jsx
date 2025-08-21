@@ -9,6 +9,7 @@ const Jobs = () => {
     const [selectedFilters, setSelectedFilters] = useState([]);
     const [showFilters, setShowFilters] = useState(false);
     const [searchParams, setSearchParams] = useSearchParams();
+    const [visibleJobsCount, setVisibleJobsCount] = useState(30); // State to control number of visible jobs
 
     const { jobs, loading, error } = useJobs();
 
@@ -102,6 +103,10 @@ const Jobs = () => {
 
     const clearFilter = (filter) => {
         setSelectedFilters(prev => prev.filter(f => f !== filter));
+    };
+
+    const handleLoadMore = () => {
+        setVisibleJobsCount(prev => prev + 30); // Increase by 30 jobs
     };
 
     return (
@@ -257,7 +262,7 @@ const Jobs = () => {
                         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                     >
                         {filteredJobs && filteredJobs.length > 0 ? (
-                            filteredJobs.map((job, index) => (
+                            filteredJobs.slice(0, visibleJobsCount).map((job, index) => (
                                 <motion.div
                                     key={job._id || `job-${index}`}
                                     layout
@@ -287,10 +292,13 @@ const Jobs = () => {
                     </motion.div>
                 )}
 
-                {filteredJobs && filteredJobs.length > 0 && (
+                {filteredJobs && filteredJobs.length > visibleJobsCount && (
                     <div className="mt-12 flex justify-center">
-                        <button className="px-6 py-3 bg-white text-blue-600 font-medium rounded-lg border border-blue-600 hover:bg-blue-50 transition-colors">
-                            Load More Jobs ({filteredJobs.length} shown)
+                        <button
+                            onClick={handleLoadMore}
+                            className="px-6 py-3 bg-white text-blue-600 font-medium rounded-lg border border-blue-600 hover:bg-blue-50 transition-colors"
+                        >
+                            Load More Jobs ({visibleJobsCount} shown)
                         </button>
                     </div>
                 )}
