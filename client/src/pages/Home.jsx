@@ -39,20 +39,13 @@ const Home = () => {
                 let jobsArray = [];
 
                 if (response.data) {
-                    // Check if response.data has a jobs property
                     if (response.data.jobs && Array.isArray(response.data.jobs)) {
                         jobsArray = response.data.jobs;
-                    }
-                    // Check if response.data itself is an array
-                    else if (Array.isArray(response.data)) {
+                    } else if (Array.isArray(response.data)) {
                         jobsArray = response.data;
-                    }
-                    // Check if response.data has a data property with jobs
-                    else if (response.data.data && Array.isArray(response.data.data)) {
+                    } else if (response.data.data && Array.isArray(response.data.data)) {
                         jobsArray = response.data.data;
-                    }
-                    // Check other common structures
-                    else if (response.data.results && Array.isArray(response.data.results)) {
+                    } else if (response.data.results && Array.isArray(response.data.results)) {
                         jobsArray = response.data.results;
                     }
                 }
@@ -60,7 +53,6 @@ const Home = () => {
                 console.log('Extracted jobs array:', jobsArray);
                 console.log('Jobs array length:', jobsArray.length);
 
-                // Take first 4 jobs and ensure they have required properties
                 const validJobs = jobsArray
                     .filter(job => job && job._id && job.jobTitle)
                     .slice(0, 4);
@@ -133,36 +125,6 @@ const Home = () => {
         <div>
             <Hero />
 
-            {/* Stats Section */}
-            <section className="py-24 bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30 relative overflow-hidden">
-                <div className="absolute inset-0 opacity-5">
-                    <div className="absolute top-10 left-1/4 w-64 h-64 bg-blue-300 rounded-full blur-3xl"></div>
-                    <div className="absolute bottom-10 right-1/4 w-48 h-48 bg-purple-300 rounded-full blur-2xl"></div>
-                </div>
-
-                <div className="container mx-auto px-4 relative z-10">
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-                        {[
-                            { number: '5,000+', label: 'Active Jobs', icon: Briefcase, color: 'text-blue-600' },
-                            { number: '2,500+', label: 'Companies', icon: Building2, color: 'text-purple-600' },
-                            { number: '98%', label: 'Success Rate', icon: TrendingUp, color: 'text-green-600' },
-                            { number: '50+', label: 'Countries', icon: Globe, color: 'text-orange-600' }
-                        ].map((stat, index) => (
-                            <div key={index} className="text-center group">
-                                <div className="relative mb-4">
-                                    <div className="w-20 h-20 mx-auto bg-white/80 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:-translate-y-2">
-                                        <stat.icon className={`w-8 h-8 ${stat.color}`} />
-                                    </div>
-                                    <div className="absolute -top-1 -right-1 w-6 h-6 bg-yellow-400 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 animate-bounce"></div>
-                                </div>
-                                <h3 className="text-3xl font-bold text-gray-900 mb-1">{stat.number}</h3>
-                                <p className="text-gray-600 font-medium">{stat.label}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
             {/* Featured Jobs Section */}
             <section className="py-24 bg-white relative overflow-hidden">
                 <div className="absolute inset-0 opacity-5">
@@ -170,7 +132,7 @@ const Home = () => {
                     <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '3s' }}></div>
                 </div>
 
-                <div className="container mx-auto px-4 relative z-10">
+                <div className="container mx-auto px-8 sm:px-16 lg:px-24 xl:px-32 relative z-10">
                     <div className="text-center mb-16">
                         <div className="inline-flex items-center bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 px-6 py-3 rounded-full text-sm font-semibold mb-6 border border-blue-100">
                             <Star className="w-4 h-4 mr-2" />
@@ -213,7 +175,6 @@ const Home = () => {
                                 {featuredJobs.map((job, index) => (
                                     <div key={job._id} className="group relative">
                                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-blue-200 transition-all duration-500 overflow-hidden group-hover:-translate-y-2">
-                                            {/* Header with company info */}
                                             <div className="p-6 border-b border-gray-50">
                                                 <div className="flex items-center justify-between mb-4">
                                                     <div className="flex items-center">
@@ -257,7 +218,6 @@ const Home = () => {
                                                 </div>
                                             </div>
 
-                                            {/* Job details */}
                                             <div className="p-6">
                                                 <h3 className="text-xl font-bold text-gray-900 mb-3 leading-tight group-hover:text-blue-600 transition-colors">
                                                     {job.jobTitle || 'Exciting Opportunity'}
@@ -269,7 +229,6 @@ const Home = () => {
                                                         : 'Join our team and make an impact with this exciting remote opportunity.'}
                                                 </p>
 
-                                                {/* Skills */}
                                                 {job.skills && job.skills.length > 0 && (
                                                     <div className="flex flex-wrap gap-2 mb-6">
                                                         {job.skills.slice(0, 3).map((skill, skillIndex) => (
@@ -285,7 +244,6 @@ const Home = () => {
                                                     </div>
                                                 )}
 
-                                                {/* Stats row */}
                                                 <div className="flex items-center justify-between mb-6 p-3 bg-gray-50 rounded-lg">
                                                     <div className="flex items-center text-sm text-gray-600">
                                                         <Calendar className="w-4 h-4 mr-2" />
@@ -297,7 +255,6 @@ const Home = () => {
                                                     </div>
                                                 </div>
 
-                                                {/* CTA Button */}
                                                 <button
                                                     onClick={() => navigate(`/jobs/${job._id}`)}
                                                     className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3.5 px-6 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/25 hover:-translate-y-0.5 flex items-center justify-center group/btn"
@@ -307,14 +264,12 @@ const Home = () => {
                                                 </button>
                                             </div>
 
-                                            {/* Hover accent */}
                                             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
 
-                            {/* View All Jobs Button */}
                             <div className="text-center mt-12">
                                 <button
                                     onClick={() => navigate('/jobs')}
@@ -355,7 +310,7 @@ const Home = () => {
                     ></div>
                 </div>
 
-                <div className="container mx-auto px-4 relative z-10">
+                <div className="container mx-auto px-8 sm:px-16 lg:px-24 xl:px-32 relative z-10">
                     <div className="text-center mb-16">
                         <div className="inline-flex items-center bg-blue-50/80 backdrop-blur-sm text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
                             <Clock className="w-4 h-4 mr-2" />
@@ -371,7 +326,6 @@ const Home = () => {
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative">
-                        {/* Connection lines */}
                         <div className="hidden lg:block absolute top-1/2 left-1/3 w-1/3 h-0.5 bg-gradient-to-r from-blue-300 to-purple-300 transform -translate-y-1/2"></div>
                         <div className="hidden lg:block absolute top-1/2 right-1/3 w-1/3 h-0.5 bg-gradient-to-r from-blue-300 to-purple-300 transform -translate-y-1/2"></div>
 
@@ -403,7 +357,6 @@ const Home = () => {
                         ].map((step, index) => (
                             <div key={index} className="relative group">
                                 <div className="bg-white border border-gray-100 rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-4 relative overflow-hidden">
-                                    {/* Background pattern */}
                                     <div className="absolute top-0 right-0 w-32 h-32 opacity-5">
                                         <div className={`w-full h-full bg-gradient-to-br ${step.gradient} rounded-full blur-2xl`}></div>
                                     </div>
@@ -451,7 +404,7 @@ const Home = () => {
                     ></div>
                 </div>
 
-                <div className="container mx-auto px-4 relative z-10">
+                <div className="container mx-auto px-8 sm:px-16 lg:px-24 xl:px-32 relative z-10">
                     <div className="text-center mb-16">
                         <div className="inline-flex items-center bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-medium mb-6">
                             <Briefcase className="w-4 h-4 mr-2" />
@@ -515,7 +468,7 @@ const Home = () => {
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-blue-300 to-purple-300 rounded-full blur-3xl"></div>
                 </div>
 
-                <div className="container mx-auto px-4 relative z-10">
+                <div className="container mx-auto px-8 sm:px-16 lg:px-24 xl:px-32 relative z-10">
                     <div className="max-w-4xl mx-auto text-center">
                         <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-100 rounded-3xl p-12 relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full blur-2xl"></div>

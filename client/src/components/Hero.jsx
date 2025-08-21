@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
-import { Search, MapPin, TrendingUp } from 'lucide-react';
-import heroImg from '../assets/hero-img.png';
+import { Search, TrendingUp } from 'lucide-react';
 
 const Hero = () => {
     const [jobTitle, setJobTitle] = useState('');
-    const [location, setLocation] = useState('Florence, Italy');
 
     const popularTags = ['UI Designer', 'UX Researcher', 'Android', 'Admin'];
 
@@ -15,6 +13,8 @@ const Hero = () => {
                 <div className="absolute top-20 left-10 w-32 h-32 bg-purple-200 rounded-full blur-xl"></div>
                 <div className="absolute top-40 right-20 w-24 h-24 bg-blue-200 rounded-full blur-lg"></div>
                 <div className="absolute bottom-20 left-1/4 w-40 h-40 bg-pink-200 rounded-full blur-2xl"></div>
+                <div className="absolute top-1/3 right-1/3 w-20 h-20 bg-green-200 rounded-full blur-lg"></div>
+                <div className="absolute bottom-1/3 right-10 w-28 h-28 bg-yellow-200 rounded-full blur-xl"></div>
 
                 {/* Striped pattern overlay */}
                 <div className="absolute inset-0" style={{
@@ -29,107 +29,67 @@ const Hero = () => {
             </div>
 
             {/* Main Content */}
-            <div className="relative z-10 container mx-auto px-4 pt-20">
-                <div className="grid lg:grid-cols-2 gap-12 items-center min-h-[80vh]">
+            <div className="relative z-10 container mx-auto px-4 pt-32 pb-10">
+                <div className="text-center max-w-4xl mx-auto space-y-12 min-h-[calc(100vh-8rem)] flex flex-col justify-center">
 
-                    {/* Left Content */}
+                    {/* Hero Title */}
                     <div className="space-y-8">
                         <div className="space-y-6">
-                            <h1 className="text-5xl lg:text-7xl font-bold text-gray-900 leading-tight">
-                                Discover
-                                <br />
-                                <span className="text-gray-800">more than</span>
-                                <br />
-                                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight">
+                                <span className="block">Discover more than</span>
+                                <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                                     5000+ Jobs
                                 </span>
                             </h1>
 
-                            <div className="w-24 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"></div>
+                            <div className="w-24 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mx-auto"></div>
 
-                            <p className="text-lg text-gray-600 max-w-md leading-relaxed">
+                            <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
                                 Great platform for the job seeker that searching for
                                 new career heights and passionate about startups.
                             </p>
                         </div>
+                    </div>
 
-                        {/* Search Section */}
-                        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-lg">
-                            <div className="flex flex-col md:flex-row gap-4">
+                    {/* Search Section */}
+                    <div className="max-w-4xl mx-auto">
+                        <div className="bg-white/80 backdrop-blur-sm border border-gray-200/50 rounded-3xl p-4 shadow-2xl hover:shadow-3xl transition-all duration-300">
+                            <div className="flex items-center gap-0">
                                 <div className="flex-1 relative">
-                                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                                     <input
                                         type="text"
-                                        placeholder="Job title or keywords"
+                                        placeholder="Enter the title, keywords or phrase"
                                         value={jobTitle}
                                         onChange={(e) => setJobTitle(e.target.value)}
-                                        className="w-full pl-12 pr-4 py-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        className="w-full pl-6 pr-6 py-5 text-lg border-0 rounded-l-3xl focus:outline-none bg-transparent"
                                     />
                                 </div>
 
-                                <button className="bg-blue-600 text-white px-8 py-4 rounded-xl font-medium hover:bg-blue-700 transition-colors shadow-lg whitespace-nowrap">
-                                    Search Remote Jobs
+                                <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-5 rounded-full hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 mr-2">
+                                    <Search className="w-6 h-6" />
                                 </button>
                             </div>
                         </div>
+                    </div>
 
-                        {/* Popular Tags */}
-                        <div className="space-y-3">
-                            <p className="text-gray-600 font-medium">Popular:</p>
-                            <div className="flex flex-wrap gap-3">
-                                {popularTags.map((tag, index) => (
-                                    <button
-                                        key={index}
-                                        className="px-4 py-2 bg-white/60 backdrop-blur-sm text-gray-700 rounded-lg border border-white/30 hover:bg-white/80 hover:shadow-md transition-all duration-200"
-                                    >
-                                        {tag}
-                                    </button>
-                                ))}
-                            </div>
+                    {/* Popular Tags */}
+                    <div className="space-y-6">
+                        <p className="text-gray-600 font-medium text-lg">Popular:</p>
+                        <div className="flex flex-wrap justify-center gap-4">
+                            {popularTags.map((tag, index) => (
+                                <button
+                                    key={index}
+                                    className="px-6 py-3 bg-white/70 backdrop-blur-sm text-gray-700 rounded-2xl border border-white/40 hover:bg-white hover:shadow-lg hover:-translate-y-1 transition-all duration-200 font-medium"
+                                >
+                                    {tag}
+                                </button>
+                            ))}
                         </div>
                     </div>
 
-                    {/* Right Content - Hero Image */}
-                    <div className="relative">
-                        <div className="relative z-10">
-                            {/* Hero Image Container */}
-                            <div className="w-full h-[600px] relative">
-                                <img
-                                    src={heroImg}
-                                    alt="Job seeker professional"
-                                    className="w-full h-full object-contain"
-                                />
 
-                                {/* Geometric decorations */}
-                                <div className="absolute top-10 left-10 w-16 h-16 bg-yellow-300/80 rounded-full animate-pulse"></div>
-                                <div className="absolute bottom-20 right-10 w-12 h-12 bg-pink-300/80 rounded-full animate-bounce"></div>
-                                <div className="absolute top-1/2 left-5 w-8 h-8 bg-blue-300/80 rounded-full animate-pulse"></div>
-
-                                {/* Success indicators */}
-                                <div className="absolute top-16 right-16 bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg">
-                                    <div className="flex items-center space-x-2">
-                                        <div className="w-3 h-3 bg-green-500 rounded-full animate-ping"></div>
-                                        <span className="text-sm font-medium text-gray-700">Job Match Found!</span>
-                                    </div>
-                                </div>
-
-                                <div className="absolute bottom-16 left-16 bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg">
-                                    <div className="flex items-center space-x-2">
-                                        <TrendingUp className="w-4 h-4 text-blue-600" />
-                                        <span className="text-sm font-medium text-gray-700">Career Growth</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Floating elements */}
-                        <div className="absolute -top-8 -left-8 w-24 h-24 bg-purple-300/30 rounded-full blur-sm"></div>
-                        <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-blue-300/30 rounded-full blur-sm"></div>
-                    </div>
                 </div>
             </div>
-
-
         </div>
     );
 };

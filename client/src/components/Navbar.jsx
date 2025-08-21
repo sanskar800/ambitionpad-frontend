@@ -10,8 +10,8 @@ const Navbar = () => {
             animate={{ y: 0 }}
             className="bg-white shadow-md sticky top-0 z-50"
         >
-            <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-                <Link to="/" className="flex items-center space-x-2">
+            <div className="container mx-auto px-8 sm:px-16 lg:px-24 xl:px-32 py-2 flex justify-between items-center">
+                <Link to="/" className="flex items-center space-x-3">
                     <img
                         src={Logo}
                         alt="Ambition Pad Logo"
@@ -23,14 +23,17 @@ const Navbar = () => {
                 </Link>
 
                 <div className="hidden md:flex space-x-8">
-                    <Link to="/" className="font-medium hover:text-blue-600 transition-colors">Home</Link>
-                    <Link to="/jobs" className="font-medium hover:text-blue-600 transition-colors">Browse Jobs</Link>
-                    <Link to="/post-job" className="font-medium hover:text-blue-600 transition-colors">Post Job</Link>
+                    <Link to="/" className="font-medium hover:text-blue-600 transition-colors">
+                        Home
+                    </Link>
+                    <Link to="/jobs" className="font-medium hover:text-blue-600 transition-colors">
+                        Browse Jobs
+                    </Link>
                 </div>
 
                 <div className="flex items-center space-x-4">
-                    <button className="px-4 py-2 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors">
-                        Sign In
+                    <button className="px-6 py-2.5 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors">
+                        Join Our Talent Pool
                     </button>
                 </div>
             </div>
