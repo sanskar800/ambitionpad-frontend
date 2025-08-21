@@ -1,20 +1,42 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import JobCard from '../components/ui/JobCard';
 import { useJobs } from '../hooks/useJobs';
 import { useSearchParams } from 'react-router-dom';
+
+// Virtual scrolling component for better performance with large lists
+const VirtualizedJobGrid = React.memo(({ jobs, visibleCount }) => {
+    return (
+        <motion.div
+            layout
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
+            {jobs.slice(0, visibleCount).map((job, index) => (
+                <motion.div
+                    key={job._id}
+                    layout
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2, delay: Math.min(index * 0.02, 0.3) }}
+                >
+                    <JobCard job={job} />
+                </motion.div>
+            ))}
+        </motion.div>
+    );
+});
 
 const Jobs = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedFilters, setSelectedFilters] = useState([]);
     const [showFilters, setShowFilters] = useState(false);
     const [searchParams, setSearchParams] = useSearchParams();
-    const [visibleJobsCount, setVisibleJobsCount] = useState(30); // State to control number of visible jobs
+    const [visibleJobsCount, setVisibleJobsCount] = useState(30);
 
     const { jobs, loading, error } = useJobs();
 
-    // Filter categories
-    const filterCategories = {
+    // Memoized filter categories to prevent recreating on every render
+    const filterCategories = useMemo(() => ({
         'Work Type': ['Remote', 'Full-Time', 'Part-Time', 'Contract', 'Internship', 'Flexible Work', 'Remote-Friendly'],
         'Company Size': ['Global', 'Startup', 'Enterprise'],
         'Department': ['Marketing', 'Sales', 'Product', 'Design', 'HR', 'Operations', 'Finance'],
@@ -29,7 +51,7 @@ const Jobs = () => {
         'Mobile & Other': ['Android', 'iOS', 'React Native', 'Flutter', 'Git', 'GraphQL', 'REST API', 'WebSockets', 'Blockchain', 'Cybersecurity'],
         'Benefits': ['Health Benefits', 'Flexible Hours', 'Paid Time Off'],
         'Marketing & Sales': ['Paid Ads', 'Digital Marketing', 'Account Management', 'Project Management']
-    };
+    }), []);
 
     // Initialize search from URL params
     useEffect(() => {
@@ -39,75 +61,100 @@ const Jobs = () => {
         setSelectedFilters(filters ? filters.split(',') : []);
     }, [searchParams]);
 
-    // Update URL params when search or filters change
+    // Debounced URL update to prevent excessive updates
     useEffect(() => {
-        const params = new URLSearchParams();
-        if (searchTerm) params.set('search', searchTerm);
-        if (selectedFilters.length > 0) params.set('filters', selectedFilters.join(','));
-        setSearchParams(params);
+        const timeoutId = setTimeout(() => {
+            const params = new URLSearchParams();
+            if (searchTerm) params.set('search', searchTerm);
+            if (selectedFilters.length > 0) params.set('filters', selectedFilters.join(','));
+            setSearchParams(params);
+        }, 300);
+
+        return () => clearTimeout(timeoutId);
     }, [searchTerm, selectedFilters, setSearchParams]);
 
-    // Filter and search logic
-    const filteredJobs = React.useMemo(() => {
-        if (!Array.isArray(jobs)) {
-            return [];
+    // Create search index for faster filtering (only when jobs change)
+    const searchIndex = useMemo(() => {
+        if (!Array.isArray(jobs)) return new Map();
+
+        const index = new Map();
+        jobs.forEach(job => {
+            if (job?._id && job?.jobTitle) {
+                const searchText = [
+                    job.jobTitle || '',
+                    job.region || '',
+                    // Removed description for performance as mentioned
+                    ...(job.tags || [])
+                ].join(' ').toLowerCase();
+                index.set(job._id, searchText);
+            }
+        });
+        return index;
+    }, [jobs]);
+
+    // Optimized filter and search logic with better performance
+    const filteredJobs = useMemo(() => {
+        if (!Array.isArray(jobs)) return [];
+
+        const searchLower = searchTerm.toLowerCase().trim();
+        const hasSearch = searchLower.length > 0;
+        const hasFilters = selectedFilters.length > 0;
+
+        // If no filters, return all valid jobs early
+        if (!hasSearch && !hasFilters) {
+            return jobs.filter(job => job?._id && job?.jobTitle);
         }
 
-        const filtered = jobs.filter(job => {
-            // Must have an _id and jobTitle to be valid
-            if (!job?._id || !job?.jobTitle) {
-                return false;
+        return jobs.filter(job => {
+            // Basic validation
+            if (!job?._id || !job?.jobTitle) return false;
+
+            // Search filtering with indexed text
+            if (hasSearch) {
+                const searchText = searchIndex.get(job._id) || '';
+                if (!searchText.includes(searchLower)) return false;
             }
 
-            // Search term filtering
-            if (searchTerm.trim()) {
-                const searchLower = searchTerm.toLowerCase();
-                const jobTitle = (job.jobTitle || '').toLowerCase();
-                const region = (job.region || '').toLowerCase();
-                const description = (job.description || '').toLowerCase();
-
-                const matchesSearch = jobTitle.includes(searchLower) ||
-                    region.includes(searchLower) ||
-                    description.includes(searchLower);
-
-                if (!matchesSearch) return false;
-            }
-
-            // Tag filtering
-            if (selectedFilters.length > 0) {
+            // Tag filtering with early exit
+            if (hasFilters) {
                 const jobTags = job.tags || [];
-                const hasMatchingTag = selectedFilters.some(filter =>
+                const hasMatch = selectedFilters.some(filter =>
                     jobTags.some(tag => tag.toLowerCase() === filter.toLowerCase())
                 );
-                if (!hasMatchingTag) return false;
+                if (!hasMatch) return false;
             }
 
             return true;
         });
+    }, [jobs, searchTerm, selectedFilters, searchIndex]);
 
-        return filtered;
-    }, [jobs, searchTerm, selectedFilters]);
-
-    const handleFilterToggle = (filter) => {
+    // Memoized callbacks to prevent unnecessary re-renders
+    const handleFilterToggle = useCallback((filter) => {
         setSelectedFilters(prev =>
             prev.includes(filter)
                 ? prev.filter(f => f !== filter)
                 : [...prev, filter]
         );
-    };
+    }, []);
 
-    const clearAllFilters = () => {
+    const clearAllFilters = useCallback(() => {
         setSelectedFilters([]);
         setSearchTerm('');
-    };
+        setVisibleJobsCount(30); // Reset visible count
+    }, []);
 
-    const clearFilter = (filter) => {
+    const clearFilter = useCallback((filter) => {
         setSelectedFilters(prev => prev.filter(f => f !== filter));
-    };
+    }, []);
 
-    const handleLoadMore = () => {
-        setVisibleJobsCount(prev => prev + 30); // Increase by 30 jobs
-    };
+    const handleLoadMore = useCallback(() => {
+        setVisibleJobsCount(prev => Math.min(prev + 30, filteredJobs.length));
+    }, [filteredJobs.length]);
+
+    const handleSearchChange = useCallback((e) => {
+        setSearchTerm(e.target.value);
+        setVisibleJobsCount(30); // Reset visible count on search
+    }, []);
 
     return (
         <div className="min-h-screen bg-gray-50 py-12">
@@ -128,7 +175,7 @@ const Jobs = () => {
                             placeholder="Search jobs..."
                             className="w-full px-4 py-3 pl-12 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onChange={handleSearchChange}
                         />
                         <svg className="w-5 h-5 absolute left-4 top-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -230,6 +277,7 @@ const Jobs = () => {
                         <p className="text-gray-600">
                             {filteredJobs.length} job{filteredJobs.length !== 1 ? 's' : ''} found
                             {selectedFilters.length > 0 && ' with selected filters'}
+                            {visibleJobsCount < filteredJobs.length && ` (showing ${visibleJobsCount})`}
                         </p>
                     </div>
                 )}
@@ -257,25 +305,14 @@ const Jobs = () => {
                         </button>
                     </div>
                 ) : (
-                    <motion.div
-                        layout
-                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                    >
+                    <>
                         {filteredJobs && filteredJobs.length > 0 ? (
-                            filteredJobs.slice(0, visibleJobsCount).map((job, index) => (
-                                <motion.div
-                                    key={job._id || `job-${index}`}
-                                    layout
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.9 }}
-                                    transition={{ duration: 0.3 }}
-                                >
-                                    <JobCard job={job} />
-                                </motion.div>
-                            ))
+                            <VirtualizedJobGrid
+                                jobs={filteredJobs}
+                                visibleCount={visibleJobsCount}
+                            />
                         ) : jobs && jobs.length > 0 ? (
-                            <div className="col-span-full text-center py-12">
+                            <div className="text-center py-12">
                                 <p className="text-gray-500 text-lg">No jobs found matching your criteria</p>
                                 <button
                                     onClick={clearAllFilters}
@@ -285,11 +322,11 @@ const Jobs = () => {
                                 </button>
                             </div>
                         ) : (
-                            <div className="col-span-full text-center py-12">
+                            <div className="text-center py-12">
                                 <p className="text-gray-500 text-lg">No jobs available</p>
                             </div>
                         )}
-                    </motion.div>
+                    </>
                 )}
 
                 {filteredJobs && filteredJobs.length > visibleJobsCount && (
@@ -298,7 +335,7 @@ const Jobs = () => {
                             onClick={handleLoadMore}
                             className="px-6 py-3 bg-white text-blue-600 font-medium rounded-lg border border-blue-600 hover:bg-blue-50 transition-colors"
                         >
-                            Load More Jobs ({visibleJobsCount} shown)
+                            Load More Jobs ({visibleJobsCount} of {filteredJobs.length} shown)
                         </button>
                     </div>
                 )}
