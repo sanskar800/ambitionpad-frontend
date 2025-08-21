@@ -386,7 +386,7 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* Categories Section */}
+            {/* Categories Section
             <section className="py-24 bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-10">
                     <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-600/20 to-purple-600/20"></div>
@@ -460,7 +460,7 @@ const Home = () => {
                         </button>
                     </div>
                 </div>
-            </section>
+            </section> */}
 
             {/* CTA Section */}
             <section className="py-24 bg-white relative overflow-hidden">

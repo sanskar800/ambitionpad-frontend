@@ -106,7 +106,7 @@ const Jobs = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 py-12">
-            <div className="container mx-auto px-4">
+            <div className="container mx-auto px-8 sm:px-16 lg:px-24 xl:px-32">
                 <div className="mb-10 text-center">
                     <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Browse Remote Jobs</h1>
                     <p className="text-gray-600 max-w-2xl mx-auto">
