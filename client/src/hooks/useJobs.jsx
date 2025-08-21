@@ -14,7 +14,7 @@ export const useJobs = (page = 1, query = '') => {
             setError(null);
 
             try {
-                const response = await api.getJobs(page, query);
+                const response = await api.getBrowseJobs(page, query);
 
                 // Extract jobs from the response structure
                 const jobsData = response?.data?.jobs || [];

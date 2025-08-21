@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import Layout from './components/ui/Layout';
 import Home from './pages/Home';
 import Jobs from './pages/Jobs';
-import JobDetail from './pages/JobDetails';
+import JobDetail from './pages/JobDetail';
 import BlogDetail from './pages/BlogDetails';
 import About from './pages/About';
 import Blogs from './pages/Blogs';

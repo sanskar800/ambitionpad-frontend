@@ -1,19 +1,18 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useJobs } from '../hooks/useJobs';
+import { useJobDetails } from '../hooks/useJobDetails';
 
 const JobDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { jobs, loading, error } = useJobs();
-
-    // Find the specific job
-    const job = jobs?.find(job => job._id === id) || null;
+    const { job, loading, error } = useJobDetails(id);
 
     const handleApplyNow = () => {
         if (job?.applyNowLink) {
             window.open(job.applyNowLink, '_blank');
+        } else {
+            alert('Application process will be available soon!');
         }
     };
 
@@ -21,39 +20,33 @@ const JobDetail = () => {
         navigate('/jobs');
     };
 
-    // Extract company name from description or use fallback
     const getCompanyName = (job) => {
-        if (job?.companyName) return job.companyName;
-        if (job?.company) return job.company;
-
-        // Try to extract company name from description
-        if (job?.description) {
+        if (!job) return 'Company Name Not Available';
+        if (job.companyName) return job.companyName;
+        if (job.company) return job.company;
+        if (job.description) {
             const lines = job.description.split('\n').filter(line => line.trim());
             if (lines.length > 0) {
                 const firstLine = lines[0].trim();
-                // Check if first line looks like a company name
-                if (firstLine.length < 100 &&
+                if (
+                    firstLine.length < 100 &&
                     !firstLine.toLowerCase().startsWith('we are looking') &&
                     !firstLine.toLowerCase().startsWith('job description') &&
                     !firstLine.toLowerCase().startsWith('about the role') &&
-                    !firstLine.toLowerCase().startsWith('who we are')) {
+                    !firstLine.toLowerCase().startsWith('who we are')
+                ) {
                     return firstLine;
                 }
             }
         }
-
         return 'Company Name Not Available';
     };
 
-    // Format description with proper line breaks and sections
     const formatDescription = (description) => {
-        if (!description) return '';
-
-        // Split by double line breaks to create paragraphs
+        if (!description || description === '') return 'No description available.';
         const paragraphs = description.split('\n\n').filter(p => p.trim());
-
+        if (paragraphs.length === 0) return 'No description available.';
         return paragraphs.map((paragraph, index) => {
-            // Check if it's a section header (short line that might be a title)
             if (paragraph.length < 100 && !paragraph.includes('.') && paragraph.trim().endsWith(':')) {
                 return (
                     <h3 key={index} className="text-lg font-semibold text-gray-900 mt-6 mb-3">
@@ -61,16 +54,16 @@ const JobDetail = () => {
                     </h3>
                 );
             }
-
-            // Regular paragraph
             const lines = paragraph.split('\n');
             return (
                 <div key={index} className="mb-4">
-                    {lines.map((line, lineIndex) => (
-                        <p key={lineIndex} className="text-gray-700 mb-2">
-                            {line.trim()}
-                        </p>
-                    ))}
+                    {lines.map((line, lineIndex) =>
+                        line.trim() ? (
+                            <p key={lineIndex} className="text-gray-700 mb-2">
+                                {line.trim()}
+                            </p>
+                        ) : null
+                    )}
                 </div>
             );
         });
@@ -102,7 +95,13 @@ const JobDetail = () => {
             <div className="min-h-screen bg-gray-50 py-12">
                 <div className="container mx-auto px-4">
                     <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-8 text-center">
-                        <p className="text-red-500 text-lg mb-4">Error loading job details: {error}</p>
+                        <div className="text-red-500 text-6xl mb-4">⚠️</div>
+                        <h1 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Job</h1>
+                        <p className="text-red-500 text-lg mb-4">
+                            {error.includes('404') || error === 'Failed to fetch job details'
+                                ? `The job with ID ${id} does not exist or has been removed.`
+                                : `Error: ${error}`}
+                        </p>
                         <button
                             onClick={handleBackToJobs}
                             className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
@@ -115,12 +114,16 @@ const JobDetail = () => {
         );
     }
 
-    if (!job) {
+    if (!job || !job._id) {
         return (
             <div className="min-h-screen bg-gray-50 py-12">
                 <div className="container mx-auto px-4">
                     <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-8 text-center">
-                        <p className="text-gray-500 text-lg mb-4">Job not found</p>
+                        <div className="text-gray-400 text-6xl mb-4">📄</div>
+                        <h1 className="text-2xl font-bold text-gray-900 mb-4">Job Not Found</h1>
+                        <p className="text-gray-500 text-lg mb-4">
+                            The job with ID {id} doesn't exist or has been removed.
+                        </p>
                         <button
                             onClick={handleBackToJobs}
                             className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
@@ -144,21 +147,17 @@ const JobDetail = () => {
                     className="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden"
                 >
                     <div className="p-8">
-                        {/* Back Button */}
                         <button
                             onClick={handleBackToJobs}
-                            className="flex items-center text-blue-600 hover:text-blue-700 mb-6 transition-colors"
+                            className="flex items-center text-blue-600 hover:text-blue-700 mb-6 transition-colors group"
                         >
-                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                             </svg>
                             Back to Jobs
                         </button>
-
-                        {/* Header Section */}
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
                             <div className="flex items-start space-x-4">
-                                {/* Company Logo */}
                                 {job.companyImage && (
                                     <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center flex-shrink-0">
                                         <img
@@ -171,7 +170,6 @@ const JobDetail = () => {
                                         />
                                     </div>
                                 )}
-
                                 <div>
                                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
                                         {job.jobTitle || 'Job Title Not Available'}
@@ -180,8 +178,6 @@ const JobDetail = () => {
                                 </div>
                             </div>
                         </div>
-
-                        {/* Job Details */}
                         <div className="p-4 bg-gray-50 rounded-lg mb-8">
                             <div className="flex flex-wrap gap-6 mb-4">
                                 {job.region && job.region !== 'N/A' && (
@@ -193,7 +189,6 @@ const JobDetail = () => {
                                         <span>{job.region}</span>
                                     </div>
                                 )}
-
                                 {job.jobType && job.jobType !== 'N/A' && (
                                     <div className="flex items-center text-gray-600">
                                         <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -202,7 +197,6 @@ const JobDetail = () => {
                                         <span>{job.jobType}</span>
                                     </div>
                                 )}
-
                                 {job.neededExperience && job.neededExperience !== 'N/A' && (
                                     <div className="flex items-center text-gray-600">
                                         <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -211,7 +205,6 @@ const JobDetail = () => {
                                         <span>{job.neededExperience}</span>
                                     </div>
                                 )}
-
                                 {job.salary && job.salary !== 'N/A' && (
                                     <div className="flex items-center text-gray-600">
                                         <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -221,8 +214,6 @@ const JobDetail = () => {
                                     </div>
                                 )}
                             </div>
-
-                            {/* Tags Section */}
                             {job.tags && job.tags.length > 0 && (
                                 <div className="border-t border-gray-200 pt-4">
                                     <div className="flex items-start">
@@ -246,16 +237,12 @@ const JobDetail = () => {
                                 </div>
                             )}
                         </div>
-
-                        {/* Job Description */}
                         <div className="prose max-w-none mb-8">
                             <h2 className="text-2xl font-bold text-gray-900 mb-6">Job Description</h2>
                             <div className="text-gray-700 leading-relaxed">
                                 {formatDescription(job.description)}
                             </div>
                         </div>
-
-                        {/* Action Buttons */}
                         <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
                             <button
                                 onClick={handleApplyNow}

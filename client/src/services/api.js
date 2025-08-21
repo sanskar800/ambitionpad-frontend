@@ -16,24 +16,28 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
     (config) => {
-        // Add auth token if available
         const token = localStorage.getItem('token');
+        console.log('Request to:', config.url, 'Token:', token);
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
     },
     (error) => {
+        console.error('Request interceptor error:', error);
         return Promise.reject(error);
     }
 );
 
 // Response interceptor
 api.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        console.log('Response from:', response.config.url, 'Data:', response.data);
+        return response;
+    },
     (error) => {
+        console.error('Response error:', error.response?.data || error.message);
         if (error.response?.status === 401) {
-            // Handle unauthorized access
             localStorage.removeItem('token');
             window.location.href = '/login';
         }
@@ -42,7 +46,9 @@ api.interceptors.response.use(
 );
 
 // Job-related API calls
-export const getJobs = async (page = 1, query = '') => {
+
+// Get jobs list with basic info (no description)
+export const getBrowseJobs = async (page = 1, query = '') => {
     try {
         const response = await api.get('/browsejobs', {
             params: {
@@ -56,15 +62,17 @@ export const getJobs = async (page = 1, query = '') => {
     }
 };
 
+// Get full job details including description
 export const getJobById = async (id) => {
     try {
-        const response = await api.get(`/alljobs/${id}`); // Keep this as is, assuming it's for detailed job view
+        const response = await api.get(`/job/${id}`);
         return response.data;
     } catch (error) {
-        throw new Error(error.response?.data?.message || 'Failed to fetch job');
+        throw new Error(error.response?.data?.message || 'Failed to fetch job details');
     }
 };
 
-// Removed searchJobs function as it's now integrated into getJobs
+// Keep the old function name for backward compatibility
+export const getJobs = getBrowseJobs;
 
 export default api;
