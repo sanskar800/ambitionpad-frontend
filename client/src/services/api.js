@@ -42,9 +42,14 @@ api.interceptors.response.use(
 );
 
 // Job-related API calls
-export const getJobs = async (params = {}) => {
+export const getJobs = async (page = 1, query = '') => {
     try {
-        const response = await api.get('/alljobs', { params });
+        const response = await api.get('/browsejobs', {
+            params: {
+                page,
+                q: query,
+            },
+        });
         return response.data;
     } catch (error) {
         throw new Error(error.response?.data?.message || 'Failed to fetch jobs');
@@ -53,20 +58,13 @@ export const getJobs = async (params = {}) => {
 
 export const getJobById = async (id) => {
     try {
-        const response = await api.get(`/alljobs/${id}`);
+        const response = await api.get(`/alljobs/${id}`); // Keep this as is, assuming it's for detailed job view
         return response.data;
     } catch (error) {
         throw new Error(error.response?.data?.message || 'Failed to fetch job');
     }
 };
 
-export const searchJobs = async (query) => {
-    try {
-        const response = await api.get('/alljobs/search', { params: { q: query } });
-        return response.data;
-    } catch (error) {
-        throw new Error(error.response?.data?.message || 'Failed to search jobs');
-    }
-};
+// Removed searchJobs function as it's now integrated into getJobs
 
 export default api;
