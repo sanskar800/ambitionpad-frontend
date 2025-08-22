@@ -51,6 +51,18 @@ const Hero = () => {
     const [jobTitle, setJobTitle] = useState('');
     const [location, setLocation] = useState('');
     const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+    const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
+
+    const popularCities = [
+        'New York, United States',
+        'London, United Kingdom',
+        'Toronto, Canada',
+        'Sydney, Australia',
+        'Berlin, Germany',
+        'Tokyo, Japan',
+        'Mumbai, India',
+        'Dubai, UAE'
+    ];
 
     const suggestions = ['Designer', 'Programming', 'Digital Marketing', 'Video', 'Animation'];
 
@@ -64,43 +76,91 @@ const Hero = () => {
     // Get user's location
     const getUserLocation = async () => {
         setIsLoadingLocation(true);
+        console.log('Starting location detection...');
 
-        if (!navigator.geolocation) {
-            console.log('Geolocation is not supported by this browser');
-            setIsLoadingLocation(false);
-            return;
+        // First try IP-based location (works everywhere)
+        try {
+            console.log('Trying IP-based location...');
+            const response = await fetch('https://ipapi.co/json/');
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('IP location data:', data);
+
+                if (data.city && data.country_name) {
+                    const locationStr = `${data.city}, ${data.country_name}`;
+                    setLocation(locationStr);
+                    setIsLoadingLocation(false);
+                    console.log('IP location set:', locationStr);
+                    return;
+                }
+            }
+        } catch (error) {
+            console.error('IP location failed:', error);
         }
 
-        navigator.geolocation.getCurrentPosition(
-            async (position) => {
-                try {
-                    const { latitude, longitude } = position.coords;
+        // Fallback: Try another IP service
+        try {
+            console.log('Trying backup IP service...');
+            const response = await fetch('https://api.ipgeolocation.io/ipgeo?apiKey=free');
 
-                    // Use reverse geocoding to get address
-                    const response = await fetch(
-                        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
-                    );
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Backup IP data:', data);
 
-                    if (response.ok) {
-                        const data = await response.json();
-                        const locationStr = `${data.city || data.locality || ''}, ${data.countryName || ''}`.replace(/^,\s*/, '');
-                        setLocation(locationStr);
-                    }
-                } catch (error) {
-                    console.error('Error getting location:', error);
+                if (data.city && data.country_name) {
+                    const locationStr = `${data.city}, ${data.country_name}`;
+                    setLocation(locationStr);
+                    setIsLoadingLocation(false);
+                    console.log('Backup IP location set:', locationStr);
+                    return;
                 }
-                setIsLoadingLocation(false);
-            },
-            (error) => {
-                console.error('Error getting location:', error);
-                setIsLoadingLocation(false);
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 300000 // 5 minutes cache
             }
-        );
+        } catch (error) {
+            console.error('Backup IP location failed:', error);
+        }
+
+        // If HTTPS, try GPS location
+        if (navigator.geolocation && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
+            console.log('Trying GPS location...');
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    try {
+                        const { latitude, longitude } = position.coords;
+                        console.log('GPS coordinates:', latitude, longitude);
+
+                        const response = await fetch(
+                            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+                        );
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            console.log('GPS reverse geocoding data:', data);
+                            const locationStr = `${data.city || data.locality || ''}, ${data.countryName || ''}`.replace(/^,\s*/, '');
+                            if (locationStr.trim() !== ',') {
+                                setLocation(locationStr);
+                                console.log('GPS location set:', locationStr);
+                            }
+                        }
+                    } catch (error) {
+                        console.error('GPS reverse geocoding failed:', error);
+                    }
+                    setIsLoadingLocation(false);
+                },
+                (error) => {
+                    console.error('GPS location denied/failed:', error);
+                    setIsLoadingLocation(false);
+                },
+                {
+                    enableHighAccuracy: false,
+                    timeout: 15000,
+                    maximumAge: 600000
+                }
+            );
+        } else {
+            console.log('GPS not available - no HTTPS or geolocation support');
+            setIsLoadingLocation(false);
+        }
     };
 
     // Auto-detect location on component mount
@@ -154,18 +214,42 @@ const Hero = () => {
                                             placeholder={isLoadingLocation ? "Detecting location..." : "Your Location"}
                                             value={location}
                                             onChange={(e) => setLocation(e.target.value)}
+                                            onFocus={() => setShowLocationSuggestions(true)}
+                                            onBlur={() => setTimeout(() => setShowLocationSuggestions(false), 200)}
                                             className="w-full pl-10 pr-10 py-3 text-gray-700 rounded-xl border-0 focus:outline-none bg-gray-50 focus:bg-white transition-colors duration-200"
                                         />
-                                        {location && (
-                                            <button
-                                                onClick={getUserLocation}
-                                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-600 hover:text-blue-700 transition-colors"
-                                                title="Refresh location"
-                                            >
-                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                                </svg>
-                                            </button>
+                                        <button
+                                            onClick={getUserLocation}
+                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-600 hover:text-blue-700 transition-colors"
+                                            title="Detect my location"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                        </button>
+
+                                        {/* Location Suggestions Dropdown */}
+                                        {showLocationSuggestions && (
+                                            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-20 max-h-60 overflow-y-auto">
+                                                <div className="p-2">
+                                                    <div className="text-xs text-gray-500 font-medium mb-2 px-2">Popular Locations</div>
+                                                    {popularCities
+                                                        .filter(city => city.toLowerCase().includes(location.toLowerCase()))
+                                                        .map((city, index) => (
+                                                            <button
+                                                                key={index}
+                                                                onClick={() => {
+                                                                    setLocation(city);
+                                                                    setShowLocationSuggestions(false);
+                                                                }}
+                                                                className="w-full text-left px-3 py-2 hover:bg-gray-50 rounded-lg text-sm text-gray-700 transition-colors"
+                                                            >
+                                                                {city}
+                                                            </button>
+                                                        ))}
+                                                </div>
+                                            </div>
                                         )}
                                     </div>
 
