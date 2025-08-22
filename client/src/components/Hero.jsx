@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Briefcase, Building2, Users, TrendingUp } from 'lucide-react';
+import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, Loader2 } from 'lucide-react';
 import heroImg from '../assets/heroo-img.png';
 
 // Counter animation component
@@ -50,6 +50,7 @@ const CountUp = ({ end, duration = 2000, suffix = '' }) => {
 const Hero = () => {
     const [jobTitle, setJobTitle] = useState('');
     const [location, setLocation] = useState('');
+    const [isLoadingLocation, setIsLoadingLocation] = useState(false);
 
     const suggestions = ['Designer', 'Programming', 'Digital Marketing', 'Video', 'Animation'];
 
@@ -59,6 +60,53 @@ const Hero = () => {
         { icon: Users, label: 'Candidates', count: 3000, suffix: '+' },
         { icon: TrendingUp, label: 'New Jobs', count: 2200, suffix: '' }
     ];
+
+    // Get user's location
+    const getUserLocation = async () => {
+        setIsLoadingLocation(true);
+
+        if (!navigator.geolocation) {
+            console.log('Geolocation is not supported by this browser');
+            setIsLoadingLocation(false);
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                try {
+                    const { latitude, longitude } = position.coords;
+
+                    // Use reverse geocoding to get address
+                    const response = await fetch(
+                        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+                    );
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        const locationStr = `${data.city || data.locality || ''}, ${data.countryName || ''}`.replace(/^,\s*/, '');
+                        setLocation(locationStr);
+                    }
+                } catch (error) {
+                    console.error('Error getting location:', error);
+                }
+                setIsLoadingLocation(false);
+            },
+            (error) => {
+                console.error('Error getting location:', error);
+                setIsLoadingLocation(false);
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 300000 // 5 minutes cache
+            }
+        );
+    };
+
+    // Auto-detect location on component mount
+    useEffect(() => {
+        getUserLocation();
+    }, []);
 
     return (
         <div className="min-h-screen bg-white">
@@ -94,14 +142,31 @@ const Hero = () => {
                                     </div>
 
                                     <div className="flex-1 relative">
-                                        <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10">
+                                            {isLoadingLocation ? (
+                                                <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />
+                                            ) : (
+                                                <MapPin className="w-5 h-5 text-gray-400" />
+                                            )}
+                                        </div>
                                         <input
                                             type="text"
-                                            placeholder="Your Location"
+                                            placeholder={isLoadingLocation ? "Detecting location..." : "Your Location"}
                                             value={location}
                                             onChange={(e) => setLocation(e.target.value)}
-                                            className="w-full pl-10 pr-4 py-3 text-gray-700 rounded-xl border-0 focus:outline-none bg-gray-50 focus:bg-white transition-colors duration-200"
+                                            className="w-full pl-10 pr-10 py-3 text-gray-700 rounded-xl border-0 focus:outline-none bg-gray-50 focus:bg-white transition-colors duration-200"
                                         />
+                                        {location && (
+                                            <button
+                                                onClick={getUserLocation}
+                                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-600 hover:text-blue-700 transition-colors"
+                                                title="Refresh location"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                </svg>
+                                            </button>
+                                        )}
                                     </div>
 
                                     <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold transition-colors duration-200 flex items-center gap-2">
