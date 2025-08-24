@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { getFeaturedJobs } from '../services/api';
 import Hero from '../components/Hero';
 import { Search, MapPin, TrendingUp, Users, Star, ArrowRight, Briefcase, Code, Palette, Megaphone, ShoppingBag, Settings, Headphones, ChevronRight, Building2, Globe, Clock, ChevronLeft, Heart, Bookmark, DollarSign, Calendar, ExternalLink, Timer } from 'lucide-react';
 
@@ -21,32 +22,34 @@ const Home = () => {
     const [currentJobIndex, setCurrentJobIndex] = useState(0);
     const [featuredJobs, setFeaturedJobs] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [country, setCountry] = useState('');
     const navigate = useNavigate();
 
-    // Fetch featured jobs from API
+    // Handle location change from Hero component
+    const handleLocationChange = (countryName) => {
+        setCountry(countryName);
+    };
+
+    // Fetch featured jobs from API based on country
     useEffect(() => {
         const fetchFeaturedJobs = async () => {
             try {
-                console.log('Fetching featured jobs from:', `${API_BASE_URL}/alljobs`);
+                console.log('Fetching featured jobs from:', `${API_BASE_URL}/featuredjobs`, 'Country:', country);
 
-                const response = await api.get('/alljobs', {
-                    params: { limit: 4 }
-                });
+                const response = await getFeaturedJobs(country, 4); // Use imported getFeaturedJobs
 
-                console.log('API Response:', response.data);
+                console.log('API Response:', response);
 
-                // Handle different possible response structures
                 let jobsArray = [];
-
-                if (response.data) {
-                    if (response.data.jobs && Array.isArray(response.data.jobs)) {
-                        jobsArray = response.data.jobs;
-                    } else if (Array.isArray(response.data)) {
+                if (response) {
+                    if (response.jobs && Array.isArray(response.jobs)) {
+                        jobsArray = response.jobs;
+                    } else if (Array.isArray(response)) {
+                        jobsArray = response;
+                    } else if (response.data && Array.isArray(response.data)) {
                         jobsArray = response.data;
-                    } else if (response.data.data && Array.isArray(response.data.data)) {
-                        jobsArray = response.data.data;
-                    } else if (response.data.results && Array.isArray(response.data.results)) {
-                        jobsArray = response.data.results;
+                    } else if (response.results && Array.isArray(response.results)) {
+                        jobsArray = response.results;
                     }
                 }
 
@@ -54,12 +57,11 @@ const Home = () => {
                 console.log('Jobs array length:', jobsArray.length);
 
                 const validJobs = jobsArray
-                    .filter(job => job && job._id && job.jobTitle)
+                    .filter((job) => job && job._id && job.jobTitle)
                     .slice(0, 4);
 
                 console.log('Valid featured jobs:', validJobs);
                 setFeaturedJobs(validJobs);
-
             } catch (error) {
                 console.error('Error fetching featured jobs:', error);
                 console.error('Error response:', error.response?.data);
@@ -71,7 +73,7 @@ const Home = () => {
         };
 
         fetchFeaturedJobs();
-    }, []);
+    }, [country]);
 
     // Auto-advance carousel
     useEffect(() => {
@@ -96,14 +98,16 @@ const Home = () => {
         if (job.company) return job.company;
 
         if (job.description) {
-            const lines = job.description.split('\n').filter(line => line.trim());
+            const lines = job.description.split('\n').filter((line) => line.trim());
             if (lines.length > 0) {
                 const firstLine = lines[0].trim();
-                if (firstLine.length < 100 &&
+                if (
+                    firstLine.length < 100 &&
                     !firstLine.toLowerCase().startsWith('we are looking') &&
                     !firstLine.toLowerCase().startsWith('job description') &&
                     !firstLine.toLowerCase().startsWith('about the role') &&
-                    !firstLine.toLowerCase().startsWith('who we are')) {
+                    !firstLine.toLowerCase().startsWith('who we are')
+                ) {
                     return firstLine;
                 }
             }
@@ -116,14 +120,14 @@ const Home = () => {
             'from-blue-500 to-cyan-500',
             'from-purple-500 to-pink-500',
             'from-orange-500 to-red-500',
-            'from-green-500 to-teal-500'
+            'from-green-500 to-teal-500',
         ];
         return gradients[index % gradients.length];
     };
 
     return (
         <div>
-            <Hero />
+            <Hero onLocationChange={handleLocationChange} />
 
             {/* Featured Jobs Section */}
             <section className="py-24 bg-white relative overflow-hidden">
@@ -224,15 +228,18 @@ const Home = () => {
                                                 </h3>
 
                                                 <p className="text-gray-600 mb-4 leading-relaxed line-clamp-2">
-                                                    {job.description ?
-                                                        job.description.split('\n')[0].substring(0, 100) + '...'
+                                                    {job.description
+                                                        ? job.description.split('\n')[0].substring(0, 100) + '...'
                                                         : 'Join our team and make an impact with this exciting remote opportunity.'}
                                                 </p>
 
                                                 {job.skills && job.skills.length > 0 && (
                                                     <div className="flex flex-wrap gap-2 mb-6">
                                                         {job.skills.slice(0, 3).map((skill, skillIndex) => (
-                                                            <span key={skillIndex} className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full font-medium hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                                                            <span
+                                                                key={skillIndex}
+                                                                className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full font-medium hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                                                            >
                                                                 {skill}
                                                             </span>
                                                         ))}
@@ -305,7 +312,7 @@ const Home = () => {
                         className="absolute inset-0"
                         style={{
                             backgroundImage: `radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
-                                            radial-gradient(circle at 80% 80%, rgba(147, 51, 234, 0.1) 0%, transparent 50%)`
+                                            radial-gradient(circle at 80% 80%, rgba(147, 51, 234, 0.1) 0%, transparent 50%)`,
                         }}
                     ></div>
                 </div>
@@ -331,29 +338,29 @@ const Home = () => {
 
                         {[
                             {
-                                step: "01",
-                                title: "Create Your Profile",
-                                desc: "Build a compelling profile that showcases your skills, experience, and what makes you unique in the remote work landscape.",
+                                step: '01',
+                                title: 'Create Your Profile',
+                                desc: 'Build a compelling profile that showcases your skills, experience, and what makes you unique in the remote work landscape.',
                                 icon: Users,
-                                gradient: "from-blue-500 to-cyan-500",
-                                delay: 0
+                                gradient: 'from-blue-500 to-cyan-500',
+                                delay: 0,
                             },
                             {
-                                step: "02",
-                                title: "Discover Opportunities",
-                                desc: "Browse curated remote jobs from vetted companies. Use our smart filters to find roles that match your preferences.",
+                                step: '02',
+                                title: 'Discover Opportunities',
+                                desc: 'Browse curated remote jobs from vetted companies. Use our smart filters to find roles that match your preferences.',
                                 icon: Search,
-                                gradient: "from-purple-500 to-pink-500",
-                                delay: 0.2
+                                gradient: 'from-purple-500 to-pink-500',
+                                delay: 0.2,
                             },
                             {
-                                step: "03",
-                                title: "Get Hired",
-                                desc: "Apply with confidence and connect directly with hiring managers. Track your applications and land your dream remote job.",
+                                step: '03',
+                                title: 'Get Hired',
+                                desc: 'Apply with confidence and connect directly with hiring managers. Track your applications and land your dream remote job.',
                                 icon: Star,
-                                gradient: "from-orange-500 to-red-500",
-                                delay: 0.4
-                            }
+                                gradient: 'from-orange-500 to-red-500',
+                                delay: 0.4,
+                            },
                         ].map((step, index) => (
                             <div key={index} className="relative group">
                                 <div className="bg-white border border-gray-100 rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-4 relative overflow-hidden">
@@ -385,82 +392,6 @@ const Home = () => {
                     </div>
                 </div>
             </section>
-
-            {/* Categories Section
-            <section className="py-24 bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 relative overflow-hidden">
-                <div className="absolute inset-0 opacity-10">
-                    <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-600/20 to-purple-600/20"></div>
-                    <div
-                        className="absolute inset-0"
-                        style={{
-                            backgroundImage: `repeating-linear-gradient(
-                                90deg,
-                                transparent,
-                                transparent 100px,
-                                rgba(255, 255, 255, 0.03) 100px,
-                                rgba(255, 255, 255, 0.03) 101px
-                            )`
-                        }}
-                    ></div>
-                </div>
-
-                <div className="container mx-auto px-8 sm:px-16 lg:px-24 xl:px-32 relative z-10">
-                    <div className="text-center mb-16">
-                        <div className="inline-flex items-center bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-medium mb-6">
-                            <Briefcase className="w-4 h-4 mr-2" />
-                            Job Categories
-                        </div>
-                        <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
-                            Explore opportunities in
-                            <br />
-                            <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">trending categories</span>
-                        </h2>
-                        <p className="text-lg text-gray-300 max-w-2xl mx-auto">
-                            From cutting-edge tech roles to creative positions, find your perfect remote opportunity.
-                        </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {[
-                            { name: 'Development', icon: Code, jobs: '1,234', color: 'from-green-400 to-blue-500', bgColor: 'bg-green-500/10' },
-                            { name: 'Design', icon: Palette, jobs: '856', color: 'from-pink-400 to-red-500', bgColor: 'bg-pink-500/10' },
-                            { name: 'Marketing', icon: Megaphone, jobs: '692', color: 'from-purple-400 to-pink-500', bgColor: 'bg-purple-500/10' },
-                            { name: 'Sales', icon: TrendingUp, jobs: '543', color: 'from-orange-400 to-red-500', bgColor: 'bg-orange-500/10' },
-                            { name: 'Product', icon: ShoppingBag, jobs: '421', color: 'from-cyan-400 to-blue-500', bgColor: 'bg-cyan-500/10' },
-                            { name: 'Support', icon: Headphones, jobs: '378', color: 'from-indigo-400 to-purple-500', bgColor: 'bg-indigo-500/10' }
-                        ].map((category, index) => (
-                            <div key={index} className="group cursor-pointer">
-                                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-2xl">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div className={`w-12 h-12 ${category.bgColor} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                                            <category.icon className="w-6 h-6 text-white" />
-                                        </div>
-                                        <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-white group-hover:translate-x-1 transition-all" />
-                                    </div>
-
-                                    <h3 className="text-xl font-bold text-white mb-2">{category.name}</h3>
-                                    <p className="text-gray-400 group-hover:text-gray-300 transition-colors">
-                                        {category.jobs} open positions
-                                    </p>
-
-                                    <div className="mt-4 w-full h-1 bg-white/10 rounded-full overflow-hidden">
-                                        <div
-                                            className={`h-full bg-gradient-to-r ${category.color} rounded-full group-hover:animate-pulse`}
-                                            style={{ width: `${Math.min(parseInt(category.jobs) / 15, 100)}%` }}
-                                        ></div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="text-center mt-12">
-                        <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-2xl font-medium hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 hover:-translate-y-1">
-                            View All Categories
-                        </button>
-                    </div>
-                </div>
-            </section> */}
 
             {/* CTA Section */}
             <section className="py-24 bg-white relative overflow-hidden">

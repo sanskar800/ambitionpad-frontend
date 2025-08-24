@@ -1,3 +1,4 @@
+// api.js
 import axios from 'axios';
 
 // Base URL for the backend API
@@ -69,6 +70,21 @@ export const getJobById = async (id) => {
         return response.data;
     } catch (error) {
         throw new Error(error.response?.data?.message || 'Failed to fetch job details');
+    }
+};
+
+// Get featured jobs by country
+export const getFeaturedJobs = async (country = '', limit = 4) => {
+    try {
+        const response = await api.get('/featuredjobs', {
+            params: {
+                country: country || undefined,
+                limit,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || 'Failed to fetch featured jobs');
     }
 };
 

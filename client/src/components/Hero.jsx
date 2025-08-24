@@ -17,10 +17,8 @@ const CountUp = ({ end, duration = 2000, suffix = '' }) => {
                     const animate = (currentTime) => {
                         if (!startTime) startTime = currentTime;
                         const progress = Math.min((currentTime - startTime) / duration, 1);
-
                         const easeOut = 1 - Math.pow(1 - progress, 2);
                         const currentCount = Math.floor(easeOut * end);
-
                         setCount(currentCount);
 
                         if (progress < 1) {
@@ -47,7 +45,7 @@ const CountUp = ({ end, duration = 2000, suffix = '' }) => {
     );
 };
 
-const Hero = () => {
+const Hero = ({ onLocationChange }) => { // Add onLocationChange prop
     const [jobTitle, setJobTitle] = useState('');
     const [location, setLocation] = useState('');
     const [isLoadingLocation, setIsLoadingLocation] = useState(false);
@@ -61,7 +59,7 @@ const Hero = () => {
         'Berlin, Germany',
         'Tokyo, Japan',
         'Mumbai, India',
-        'Dubai, UAE'
+        'Dubai, UAE',
     ];
 
     const suggestions = ['Designer', 'Programming', 'Digital Marketing', 'Video', 'Animation'];
@@ -70,23 +68,34 @@ const Hero = () => {
         { icon: Briefcase, label: 'Live Job', count: 5000, suffix: '+' },
         { icon: Building2, label: 'Companies', count: 300, suffix: '+' },
         { icon: Users, label: 'Candidates', count: 3000, suffix: '+' },
-        { icon: TrendingUp, label: 'New Jobs', count: 2200, suffix: '' }
+        { icon: TrendingUp, label: 'New Jobs', count: 2200, suffix: '' },
     ];
+
+    // Function to extract country from location string
+    const extractCountry = (locationStr) => {
+        if (!locationStr) return '';
+        const parts = locationStr.split(',').map((part) => part.trim());
+        return parts[parts.length - 1] || '';
+    };
+
+    // Update parent with country name whenever location changes
+    useEffect(() => {
+        const country = extractCountry(location);
+        onLocationChange(country);
+    }, [location, onLocationChange]);
 
     // Get user's location
     const getUserLocation = async () => {
         setIsLoadingLocation(true);
         console.log('Starting location detection...');
 
-        // First try IP-based location (works everywhere)
+        // Try IP-based location
         try {
             console.log('Trying IP-based location...');
             const response = await fetch('https://ipapi.co/json/');
-
             if (response.ok) {
                 const data = await response.json();
                 console.log('IP location data:', data);
-
                 if (data.city && data.country_name) {
                     const locationStr = `${data.city}, ${data.country_name}`;
                     setLocation(locationStr);
@@ -103,11 +112,9 @@ const Hero = () => {
         try {
             console.log('Trying backup IP service...');
             const response = await fetch('https://api.ipgeolocation.io/ipgeo?apiKey=free');
-
             if (response.ok) {
                 const data = await response.json();
                 console.log('Backup IP data:', data);
-
                 if (data.city && data.country_name) {
                     const locationStr = `${data.city}, ${data.country_name}`;
                     setLocation(locationStr);
@@ -128,15 +135,16 @@ const Hero = () => {
                     try {
                         const { latitude, longitude } = position.coords;
                         console.log('GPS coordinates:', latitude, longitude);
-
                         const response = await fetch(
                             `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
                         );
-
                         if (response.ok) {
                             const data = await response.json();
                             console.log('GPS reverse geocoding data:', data);
-                            const locationStr = `${data.city || data.locality || ''}, ${data.countryName || ''}`.replace(/^,\s*/, '');
+                            const locationStr = `${data.city || data.locality || ''}, ${data.countryName || ''}`.replace(
+                                /^,\s*/,
+                                ''
+                            );
                             if (locationStr.trim() !== ',') {
                                 setLocation(locationStr);
                                 console.log('GPS location set:', locationStr);
@@ -154,7 +162,7 @@ const Hero = () => {
                 {
                     enableHighAccuracy: false,
                     timeout: 15000,
-                    maximumAge: 600000
+                    maximumAge: 600000,
                 }
             );
         } else {
@@ -173,15 +181,12 @@ const Hero = () => {
             {/* Main Content */}
             <div className="container mx-auto px-4 sm:px-8 lg:px-16 xl:px-24 py-16">
                 <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-20">
-
                     {/* Left Side - Content */}
                     <div className="flex-1 space-y-8 text-center lg:text-left fade-in">
-                        {/* Heading */}
                         <div className="space-y-6">
                             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-black leading-tight">
                                 Find a job that suits your interest & skills.
                             </h1>
-
                             <p className="text-lg text-gray-600 leading-relaxed max-w-lg">
                                 Aliquam vitae turpis in diam convallis finibus in at risus. Nullam in scelerisque leo, eget sollicitudin velit bestibulum.
                             </p>
@@ -200,7 +205,6 @@ const Hero = () => {
                                             className="w-full px-4 py-3 text-gray-700 rounded-xl border-0 focus:outline-none bg-gray-50 focus:bg-white transition-colors duration-200"
                                         />
                                     </div>
-
                                     <div className="flex-1 relative">
                                         <div className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10">
                                             {isLoadingLocation ? (
@@ -211,7 +215,7 @@ const Hero = () => {
                                         </div>
                                         <input
                                             type="text"
-                                            placeholder={isLoadingLocation ? "Detecting location..." : "Your Location"}
+                                            placeholder={isLoadingLocation ? 'Detecting location...' : 'Your Location'}
                                             value={location}
                                             onChange={(e) => setLocation(e.target.value)}
                                             onFocus={() => setShowLocationSuggestions(true)}
@@ -224,18 +228,21 @@ const Hero = () => {
                                             title="Detect my location"
                                         >
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth="2"
+                                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                                />
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                             </svg>
                                         </button>
-
-                                        {/* Location Suggestions Dropdown */}
                                         {showLocationSuggestions && (
                                             <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-20 max-h-60 overflow-y-auto">
                                                 <div className="p-2">
                                                     <div className="text-xs text-gray-500 font-medium mb-2 px-2">Popular Locations</div>
                                                     {popularCities
-                                                        .filter(city => city.toLowerCase().includes(location.toLowerCase()))
+                                                        .filter((city) => city.toLowerCase().includes(location.toLowerCase()))
                                                         .map((city, index) => (
                                                             <button
                                                                 key={index}
@@ -252,22 +259,17 @@ const Hero = () => {
                                             </div>
                                         )}
                                     </div>
-
                                     <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold transition-colors duration-200 flex items-center gap-2">
                                         <Search className="w-5 h-5" />
                                         Find Job
                                     </button>
                                 </div>
                             </div>
-
-                            {/* Suggestions */}
                             <div className="text-sm text-gray-500 max-w-2xl">
                                 <span className="font-medium">Suggestion: </span>
                                 {suggestions.map((suggestion, index) => (
                                     <span key={index}>
-                                        <span
-                                            className={suggestion === 'Digital Marketing' ? 'text-blue-600 font-medium' : ''}
-                                        >
+                                        <span className={suggestion === 'Digital Marketing' ? 'text-blue-600 font-medium' : ''}>
                                             {suggestion}
                                         </span>
                                         {index < suggestions.length - 1 && ', '}
@@ -289,7 +291,6 @@ const Hero = () => {
                                     e.target.nextSibling.style.display = 'flex';
                                 }}
                             />
-                            {/* Fallback placeholder */}
                             <div
                                 className="hidden w-full h-80 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl items-center justify-center"
                                 style={{ display: 'none' }}
@@ -320,11 +321,7 @@ const Hero = () => {
                                     </div>
                                     <div>
                                         <div className="text-2xl font-bold text-black">
-                                            <CountUp
-                                                end={stat.count}
-                                                duration={1500}
-                                                suffix={stat.suffix}
-                                            />
+                                            <CountUp end={stat.count} duration={1500} suffix={stat.suffix} />
                                         </div>
                                         <div className="text-sm text-gray-600">{stat.label}</div>
                                     </div>
