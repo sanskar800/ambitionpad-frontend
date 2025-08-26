@@ -14,7 +14,7 @@ const Footer = () => {
         >
             <div className="container mx-auto px-4 py-8 sm:px-8 lg:px-16 xl:px-24">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {/* First Column: Logo */}
+                    {/* First Column: Logo and Contact Info */}
                     <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
@@ -38,6 +38,24 @@ const Footer = () => {
                                 <p className="text-xs text-gray-400">Remote Career Platform</p>
                             </div>
                         </Link>
+                        <div className="text-xs text-gray-400 space-y-1">
+                            <p>
+                                <a
+                                    href="mailto:kailash.panday@ambitionpad.com"
+                                    className="hover:text-white transition-colors duration-200"
+                                >
+                                    Email: kailash.panday@ambitionpad.com
+                                </a>
+                            </p>
+                            <p>
+                                <a
+                                    href="tel:+9779851241139"
+                                    className="hover:text-white transition-colors duration-200"
+                                >
+                                    Phone: +9779851241139
+                                </a>
+                            </p>
+                        </div>
                     </motion.div>
 
                     {/* Second Column: For Job Seekers */}
@@ -49,12 +67,23 @@ const Footer = () => {
                         <ul className="space-y-3">
                             {['Browse Jobs', 'Join Our Talent Pool'].map((link, index) => (
                                 <li key={index}>
-                                    <Link
-                                        to={link === 'Browse Jobs' ? '/jobs' : '#'}
-                                        className="text-gray-400 hover:text-white transition-all duration-200 flex items-center group text-sm"
-                                    >
-                                        <span className="group-hover:translate-x-1 transition-transform duration-200">{link}</span>
-                                    </Link>
+                                    {link === 'Join Our Talent Pool' ? (
+                                        <a
+                                            href="https://forms.gle/YC76wt94ss9vQw8B7"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-gray-400 hover:text-white transition-all duration-200 flex items-center group text-sm"
+                                        >
+                                            <span className="group-hover:translate-x-1 transition-transform duration-200">{link}</span>
+                                        </a>
+                                    ) : (
+                                        <Link
+                                            to="/jobs"
+                                            className="text-gray-400 hover:text-white transition-all duration-200 flex items-center group text-sm"
+                                        >
+                                            <span className="group-hover:translate-x-1 transition-transform duration-200">{link}</span>
+                                        </Link>
+                                    )}
                                 </li>
                             ))}
                         </ul>

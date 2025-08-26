@@ -63,7 +63,8 @@ const JobCard = ({ job }) => {
                             </p>
                         </div>
                     </div>
-                    <span className="text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded">
+                    {/* Fixed time display with consistent sizing */}
+                    <span className="text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded flex-shrink-0 whitespace-nowrap min-w-[3.5rem] text-center">
                         {postedTime()}
                     </span>
                 </div>
@@ -102,18 +103,15 @@ const JobCard = ({ job }) => {
                 )}
             </div>
 
-            {/* Footer */}
+            {/* Footer - Centered View Details button */}
             <div className="px-5 py-3 bg-gray-50 border-t border-gray-100">
-                <div className="flex justify-between items-center">
+                <div className="flex justify-center">
                     <button
                         onClick={handleViewDetails}
                         className="px-4 py-2 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors"
                     >
                         View Details
                     </button>
-                    <span className="text-xs text-gray-500">
-                        {job.applicants || 0} applicants
-                    </span>
                 </div>
             </div>
         </div>

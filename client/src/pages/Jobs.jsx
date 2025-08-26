@@ -28,7 +28,7 @@ const Jobs = () => {
         return () => clearTimeout(timeoutId);
     }, [searchTerm, setSearchParams]);
 
-    // Filter jobs
+    // Enhanced filter jobs function
     const filteredJobs = useMemo(() => {
         if (!Array.isArray(jobs)) return [];
 
@@ -37,17 +37,23 @@ const Jobs = () => {
         }
 
         const searchLower = searchTerm.toLowerCase().trim();
+        const searchWords = searchLower.split(/\s+/);
+
         return jobs.filter(job => {
             if (!job?._id || !job?.jobTitle) return false;
 
-            const searchText = [
+            const searchableText = [
                 job.jobTitle || '',
                 job.region || '',
                 job.companyName || job.company || '',
-                ...(job.tags || [])
+                job.jobType || '',
+                ...(job.tags || []),
+                ...(job.skills || []),
+                job.description || '',
             ].join(' ').toLowerCase();
 
-            return searchText.includes(searchLower);
+            // Check if all search words are present in the searchable text
+            return searchWords.every(word => searchableText.includes(word));
         });
     }, [jobs, searchTerm]);
 
@@ -65,21 +71,75 @@ const Jobs = () => {
     const clearAllFilters = () => {
         setSearchTerm('');
         setCurrentPage(1);
+        setSearchParams({});
     };
+
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        const params = new URLSearchParams();
+        if (searchTerm) params.set('search', searchTerm);
+        setSearchParams(params);
+    };
+
+    // Get search info for display
+    const getSearchDisplayInfo = () => {
+        const search = searchParams.get('search');
+        if (search) {
+            return { type: 'search', search };
+        }
+        return { type: 'none' };
+    };
+
+    const searchInfo = getSearchDisplayInfo();
 
     return (
         <div className="min-h-screen bg-gray-50 py-12">
             <div className="container mx-auto px-8 sm:px-16 lg:px-24 xl:px-32">
                 {/* Header */}
                 <div className="mb-12 text-center">
-                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">Find Remote Jobs</h1>
+                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+                        {searchInfo.type !== 'none' ? 'Search Results' : 'Find Remote Jobs'}
+                    </h1>
                     <p className="text-gray-600 max-w-2xl mx-auto">
-                        Discover your next remote opportunity from top companies worldwide
+                        {searchInfo.type !== 'none'
+                            ? 'Here are the jobs matching your search criteria'
+                            : 'Discover your next remote opportunity from top companies worldwide'
+                        }
                     </p>
                 </div>
 
+                {/* Search Summary Banner */}
+                {searchInfo.type !== 'none' && (
+                    <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-xl max-w-4xl mx-auto">
+                        <div className="flex items-center justify-between flex-wrap gap-4">
+                            <div className="flex items-center space-x-3">
+                                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                                <div>
+                                    <p className="text-blue-800 font-medium">
+                                        Searching for <span className="font-bold">"{searchInfo.search}"</span>
+                                    </p>
+                                    <p className="text-blue-600 text-sm">
+                                        {!loading && `${filteredJobs.length} result${filteredJobs.length !== 1 ? 's' : ''} found`}
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={clearAllFilters}
+                                className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center space-x-1"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                <span>Clear Search</span>
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 {/* Search Bar */}
-                <div className="mb-10 max-w-2xl mx-auto">
+                <form onSubmit={handleSearchSubmit} className="mb-10 max-w-2xl mx-auto">
                     <div className="relative">
                         <input
                             type="text"
@@ -92,7 +152,7 @@ const Jobs = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                     </div>
-                </div>
+                </form>
 
                 {/* Results Summary */}
                 {!loading && (
@@ -102,12 +162,10 @@ const Jobs = () => {
                                 <>
                                     Showing <span className="font-semibold">{filteredJobs.length}</span> of{' '}
                                     <span className="font-semibold">{totalJobs}</span> remote jobs
-                                    {searchTerm && ` for "${searchTerm}"`}
                                 </>
                             ) : (
                                 <>
                                     <span className="font-semibold">{filteredJobs.length}</span> remote job{filteredJobs.length !== 1 ? 's' : ''} found
-                                    {searchTerm && ` for "${searchTerm}"`}
                                 </>
                             )}
                         </p>

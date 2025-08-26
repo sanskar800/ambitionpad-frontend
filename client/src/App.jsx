@@ -4,7 +4,7 @@ import Layout from './components/ui/Layout';
 import Home from './pages/Home';
 import Jobs from './pages/Jobs';
 import JobDetail from './pages/JobDetail';
-import BlogDetail from './pages/BlogDetails';
+import BlogDetails from './pages/BlogDetails';
 import About from './pages/About';
 import Blogs from './pages/Blogs';
 
@@ -17,7 +17,7 @@ const ScrollToTop = () => {
     window.scrollTo({
       top: 0,
       left: 0,
-      behavior: 'smooth' // Use 'auto' for instant scroll, 'smooth' for animated scroll
+      behavior: 'smooth'
     });
   }, [pathname]);
 
@@ -34,8 +34,8 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/jobs" element={<Jobs />} />
             <Route path="/jobs/:id" element={<JobDetail />} />
-            <Route path="/blog" element={<Blogs />} />
-            <Route path="/blog/:id" element={<BlogDetail />} />
+            <Route path="/blogs" element={<Blogs />} />
+            <Route path="/blogs/:id" element={<BlogDetails />} />
             <Route path="/about" element={<About />} />
           </Routes>
         </Layout>

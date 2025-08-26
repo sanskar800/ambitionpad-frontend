@@ -1,76 +1,7 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-
-// Mock blog data - replace with your actual data source
-const mockBlogs = [
-    {
-        id: 1,
-        title: "10 Tips for Remote Job Interviews",
-        excerpt: "Master the art of remote interviewing with these proven strategies that will help you stand out from the competition.",
-        author: "Sarah Johnson",
-        date: "2024-03-15",
-        readTime: "5 min read",
-        category: "Career Tips",
-        image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=250&fit=crop",
-        tags: ["interviews", "remote work", "career"]
-    },
-    {
-        id: 2,
-        title: "The Future of Remote Work: Trends to Watch",
-        excerpt: "Explore the latest trends shaping the remote work landscape and what they mean for job seekers and employers.",
-        author: "Mike Chen",
-        date: "2024-03-12",
-        readTime: "8 min read",
-        category: "Industry Insights",
-        image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=250&fit=crop",
-        tags: ["remote work", "trends", "future"]
-    },
-    {
-        id: 3,
-        title: "Building a Strong Remote Work Portfolio",
-        excerpt: "Learn how to showcase your remote work skills and create a portfolio that attracts top employers.",
-        author: "Emma Davis",
-        date: "2024-03-10",
-        readTime: "6 min read",
-        category: "Career Development",
-        image: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=400&h=250&fit=crop",
-        tags: ["portfolio", "skills", "career development"]
-    },
-    {
-        id: 4,
-        title: "Work-Life Balance in Remote Jobs",
-        excerpt: "Discover strategies to maintain a healthy work-life balance while working from home.",
-        author: "Alex Rodriguez",
-        date: "2024-03-08",
-        readTime: "7 min read",
-        category: "Wellness",
-        image: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=400&h=250&fit=crop",
-        tags: ["work-life balance", "wellness", "productivity"]
-    },
-    {
-        id: 5,
-        title: "Top Remote-Friendly Companies in 2024",
-        excerpt: "A comprehensive list of companies that are leading the way in remote work opportunities.",
-        author: "Lisa Park",
-        date: "2024-03-05",
-        readTime: "10 min read",
-        category: "Company Spotlights",
-        image: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=400&h=250&fit=crop",
-        tags: ["companies", "remote jobs", "opportunities"]
-    },
-    {
-        id: 6,
-        title: "Essential Tools for Remote Workers",
-        excerpt: "A curated list of must-have tools and software that every remote worker should know about.",
-        author: "David Kim",
-        date: "2024-03-02",
-        readTime: "9 min read",
-        category: "Tools & Technology",
-        image: "https://images.unsplash.com/photo-1484417894907-623942c8ee29?w=400&h=250&fit=crop",
-        tags: ["tools", "technology", "productivity"]
-    }
-];
+import { blogs } from "../assets/assets.js"; // ✅ import blogs directly
 
 const BlogCard = ({ blog }) => {
     return (
@@ -81,10 +12,10 @@ const BlogCard = ({ blog }) => {
             transition={{ duration: 0.3 }}
             className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
         >
-            <Link to={`/blog/${blog.id}`} className="block">
+            <Link to={`/blogs/${blog.id}`} className="block"> {/* ✅ Fixed: use blog.id instead of id */}
                 <div className="aspect-video overflow-hidden">
                     <img
-                        src={blog.image}
+                        src={blog.image}  // ✅ directly use blog.image
                         alt={blog.title}
                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     />
@@ -92,9 +23,9 @@ const BlogCard = ({ blog }) => {
                 <div className="p-6">
                     <div className="flex items-center justify-between mb-3">
                         <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
-                            {blog.category}
+                            {blog.category || "Remote Work"}
                         </span>
-                        <span className="text-gray-500 text-sm">{blog.readTime}</span>
+                        <span className="text-gray-500 text-sm">{blog.readTime || "5 min read"}</span>
                     </div>
 
                     <h2 className="text-xl font-bold text-gray-900 mb-3 hover:text-blue-600 transition-colors line-clamp-2">
@@ -102,19 +33,21 @@ const BlogCard = ({ blog }) => {
                     </h2>
 
                     <p className="text-gray-600 mb-4 line-clamp-3">
-                        {blog.excerpt}
+                        {blog.description}
                     </p>
 
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                            <span className="text-sm font-medium text-gray-900">{blog.author}</span>
+                            <span className="text-sm font-medium text-gray-900">{blog.author || "Ambition Pad Team"}</span>
                             <span className="text-gray-400">•</span>
                             <span className="text-sm text-gray-500">
-                                {new Date(blog.date).toLocaleDateString('en-US', {
-                                    year: 'numeric',
-                                    month: 'short',
-                                    day: 'numeric'
-                                })}
+                                {blog.date
+                                    ? new Date(blog.date).toLocaleDateString("en-US", {
+                                        year: "numeric",
+                                        month: "short",
+                                        day: "numeric",
+                                    })
+                                    : "2025"}
                             </span>
                         </div>
                     </div>
@@ -131,19 +64,21 @@ const Blogs = () => {
 
     // Get unique categories
     const categories = useMemo(() => {
-        const cats = [...new Set(mockBlogs.map(blog => blog.category))];
+        const cats = [...new Set(blogs.map(blog => blog.category || "Remote Work"))];
         return ['All', ...cats];
     }, []);
 
-    // Filter blogs based on search and category
+    // Filter blogs
     const filteredBlogs = useMemo(() => {
-        return mockBlogs.filter(blog => {
-            const matchesSearch = searchTerm === '' ||
+        return blogs.filter(blog => {
+            const matchesSearch =
+                searchTerm === '' ||
                 blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                blog.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                blog.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+                blog.description.toLowerCase().includes(searchTerm.toLowerCase());
 
-            const matchesCategory = selectedCategory === '' || selectedCategory === 'All' ||
+            const matchesCategory =
+                selectedCategory === '' ||
+                selectedCategory === 'All' ||
                 blog.category === selectedCategory;
 
             return matchesSearch && matchesCategory;
@@ -152,12 +87,12 @@ const Blogs = () => {
 
     const handleSearchChange = useCallback((e) => {
         setSearchTerm(e.target.value);
-        setVisibleCount(6); // Reset visible count on search
+        setVisibleCount(6);
     }, []);
 
     const handleCategoryChange = useCallback((category) => {
         setSelectedCategory(category);
-        setVisibleCount(6); // Reset visible count on category change
+        setVisibleCount(6);
     }, []);
 
     const loadMore = useCallback(() => {
@@ -177,9 +112,9 @@ const Blogs = () => {
                     </p>
                 </div>
 
-                {/* Search and Filters */}
+                {/* Search & Filters */}
                 <div className="bg-white rounded-xl shadow-md p-6 mb-8">
-                    {/* Search Bar */}
+                    {/* Search */}
                     <div className="relative max-w-md mx-auto mb-6">
                         <input
                             type="text"
@@ -193,7 +128,7 @@ const Blogs = () => {
                         </svg>
                     </div>
 
-                    {/* Category Filters */}
+                    {/* Categories */}
                     <div className="flex flex-wrap justify-center gap-2">
                         {categories.map(category => (
                             <button
@@ -227,7 +162,7 @@ const Blogs = () => {
                             ))}
                         </div>
 
-                        {/* Load More Button */}
+                        {/* Load More */}
                         {visibleCount < filteredBlogs.length && (
                             <div className="text-center">
                                 <button

@@ -52,7 +52,10 @@ const Navbar = () => {
 
                     {/* Desktop CTA Button */}
                     <div className="hidden md:flex items-center">
-                        <button className="px-6 py-2.5 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors duration-200 whitespace-nowrap">
+                        <button
+                            className="px-6 py-2.5 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors duration-200 whitespace-nowrap"
+                            onClick={() => window.open('https://forms.gle/YC76wt94ss9vQw8B7', '_blank')}
+                        >
                             Join Our Talent Pool
                         </button>
                     </div>
@@ -123,7 +126,9 @@ const Navbar = () => {
                                 <div className="pt-2">
                                     <button
                                         className="w-full px-6 py-3 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors duration-200"
-                                        onClick={closeMenu}
+                                        onClick={() => {
+                                            window.open('https://forms.gle/YC76wt94ss9vQw8B7', '_blank'); // Opens in new tab
+                                        }}
                                     >
                                         Join Our Talent Pool
                                     </button>

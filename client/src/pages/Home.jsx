@@ -36,7 +36,7 @@ const Home = () => {
             try {
                 console.log('Fetching featured jobs from:', `${API_BASE_URL}/featuredjobs`, 'Country:', country);
 
-                const response = await getFeaturedJobs(country, 4); // Use imported getFeaturedJobs
+                const response = await getFeaturedJobs(country, 6); // Use imported getFeaturedJobs
 
                 console.log('API Response:', response);
 
@@ -58,7 +58,7 @@ const Home = () => {
 
                 const validJobs = jobsArray
                     .filter((job) => job && job._id && job.jobTitle)
-                    .slice(0, 4);
+                    .slice(0, 6);
 
                 console.log('Valid featured jobs:', validJobs);
                 setFeaturedJobs(validJobs);
@@ -115,31 +115,21 @@ const Home = () => {
         return 'Remote Company';
     };
 
-    const getJobGradient = (index) => {
-        const gradients = [
-            'from-blue-500 to-cyan-500',
-            'from-purple-500 to-pink-500',
-            'from-orange-500 to-red-500',
-            'from-green-500 to-teal-500',
-        ];
-        return gradients[index % gradients.length];
-    };
-
     return (
         <div>
             <Hero onLocationChange={handleLocationChange} />
 
             {/* Featured Jobs Section */}
-            <section className="py-24 bg-white relative overflow-hidden">
-                <div className="absolute inset-0 opacity-5">
-                    <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full blur-3xl animate-pulse"></div>
-                    <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '3s' }}></div>
+            <section className="py-20 bg-gradient-to-br from-blue-50/50 via-white to-purple-50/50 relative overflow-hidden">
+                <div className="absolute inset-0 opacity-30">
+                    <div className="absolute top-10 left-10 w-32 h-32 bg-blue-200 rounded-full blur-3xl animate-pulse"></div>
+                    <div className="absolute bottom-10 right-10 w-40 h-40 bg-purple-200 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
                 </div>
 
                 <div className="container mx-auto px-8 sm:px-16 lg:px-24 xl:px-32 relative z-10">
                     <div className="text-center mb-16">
-                        <div className="inline-flex items-center bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 px-6 py-3 rounded-full text-sm font-semibold mb-6 border border-blue-100">
-                            <Star className="w-4 h-4 mr-2" />
+                        <div className="inline-flex items-center bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 px-6 py-3 rounded-full text-sm font-semibold mb-6 border border-blue-200 shadow-sm">
+                            <Star className="w-4 h-4 mr-2 text-yellow-500" />
                             Featured Jobs
                         </div>
                         <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
@@ -152,135 +142,119 @@ const Home = () => {
                     </div>
 
                     {loading ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-                            {[...Array(4)].map((_, i) => (
-                                <div key={i} className="bg-gray-100 rounded-2xl p-6 animate-pulse">
-                                    <div className="flex items-center mb-4">
-                                        <div className="w-12 h-12 bg-gray-200 rounded-xl mr-4"></div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+                            {[...Array(6)].map((_, i) => (
+                                <div key={i} className="bg-white rounded-2xl p-7 animate-pulse border border-gray-100 shadow-lg">
+                                    <div className="flex items-center mb-6">
+                                        <div className="w-14 h-14 bg-gray-200 rounded-xl mr-4"></div>
                                         <div className="flex-1">
                                             <div className="h-4 bg-gray-200 rounded mb-2 w-3/4"></div>
                                             <div className="h-3 bg-gray-200 rounded w-1/2"></div>
                                         </div>
                                     </div>
-                                    <div className="h-6 bg-gray-200 rounded mb-3 w-4/5"></div>
-                                    <div className="h-4 bg-gray-200 rounded mb-4 w-full"></div>
-                                    <div className="flex gap-2 mb-4">
-                                        <div className="h-6 bg-gray-200 rounded-full w-16"></div>
+                                    <div className="h-5 bg-gray-200 rounded mb-4 w-4/5"></div>
+                                    <div className="flex gap-2 mb-6">
                                         <div className="h-6 bg-gray-200 rounded-full w-20"></div>
-                                        <div className="h-6 bg-gray-200 rounded-full w-18"></div>
+                                        <div className="h-6 bg-gray-200 rounded-full w-24"></div>
                                     </div>
-                                    <div className="h-10 bg-gray-200 rounded-xl w-full"></div>
+                                    <div className="h-11 bg-gray-200 rounded-xl w-full"></div>
                                 </div>
                             ))}
                         </div>
                     ) : featuredJobs.length > 0 ? (
-                        <div className="max-w-6xl mx-auto">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                {featuredJobs.map((job, index) => (
-                                    <div key={job._id} className="group relative">
-                                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-blue-200 transition-all duration-500 overflow-hidden group-hover:-translate-y-2">
-                                            <div className="p-6 border-b border-gray-50">
-                                                <div className="flex items-center justify-between mb-4">
-                                                    <div className="flex items-center">
-                                                        {job.companyImage ? (
-                                                            <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-50 mr-4 ring-2 ring-gray-100 group-hover:ring-blue-200 transition-all duration-300">
-                                                                <img
-                                                                    src={job.companyImage}
-                                                                    alt={`${getCompanyName(job)} Logo`}
-                                                                    className="w-full h-full object-cover"
-                                                                    onError={(e) => {
-                                                                        e.target.style.display = 'none';
-                                                                        e.target.parentElement.innerHTML = `
-                                                                            <div class="w-full h-full bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center">
-                                                                                <svg class="w-7 h-7 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                                                                                    <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm2 6a2 2 0 104 0 2 2 0 00-4 0zm6 0a2 2 0 104 0 2 2 0 00-4 0z" clip-rule="evenodd"></path>
-                                                                                </svg>
-                                                                            </div>
-                                                                        `;
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                        ) : (
-                                                            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center mr-4 ring-2 ring-gray-100 group-hover:ring-blue-200 transition-all duration-300">
-                                                                <Building2 className="w-7 h-7 text-blue-600" />
-                                                            </div>
-                                                        )}
-                                                        <div>
-                                                            <h4 className="font-semibold text-gray-900 text-base">{getCompanyName(job)}</h4>
-                                                            <div className="flex items-center text-sm text-gray-500 mt-1">
-                                                                <MapPin className="w-3.5 h-3.5 mr-1" />
-                                                                {job.region || 'Remote'}
-                                                            </div>
+                        <div className="max-w-7xl mx-auto">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {featuredJobs.slice(0, 6).map((job, index) => (
+                                    <div key={job._id} className="group">
+                                        <div className="bg-white rounded-2xl border border-gray-100 hover:border-blue-300 hover:shadow-xl transition-all duration-500 overflow-hidden h-full flex flex-col group-hover:-translate-y-2 shadow-lg hover:shadow-blue-100">
+                                            {/* Gradient Header */}
+                                            <div className="h-2 bg-gradient-to-r from-blue-500 to-blue-600"></div>
+
+                                            {/* Company Header */}
+                                            <div className="p-7 pb-5">
+                                                <div className="flex items-center mb-5">
+                                                    {job.companyImage ? (
+                                                        <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-50 mr-4 ring-2 ring-gray-100 group-hover:ring-blue-200 transition-all duration-300">
+                                                            <img
+                                                                src={job.companyImage}
+                                                                alt={`${getCompanyName(job)} Logo`}
+                                                                className="w-full h-full object-cover"
+                                                                onError={(e) => {
+                                                                    e.target.style.display = 'none';
+                                                                    e.target.parentElement.innerHTML = `
+                                                                        <div class="w-full h-full bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center">
+                                                                            <svg class="w-7 h-7 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                                                                <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm2 6a2 2 0 104 0 2 2 0 00-4 0zm6 0a2 2 0 104 0 2 2 0 00-4 0z" clip-rule="evenodd"></path>
+                                                                            </svg>
+                                                                        </div>
+                                                                    `;
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    ) : (
+                                                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center mr-4 ring-2 ring-gray-100 group-hover:ring-blue-200 transition-all duration-300">
+                                                            <Building2 className="w-7 h-7 text-blue-600" />
+                                                        </div>
+                                                    )}
+                                                    <div className="flex-1 min-w-0">
+                                                        <h4 className="font-semibold text-gray-900 text-base truncate">{getCompanyName(job)}</h4>
+                                                        <div className="flex items-center text-sm text-gray-500 mt-1">
+                                                            <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
+                                                            <span className="truncate">{job.region || 'Remote Worldwide'}</span>
                                                         </div>
                                                     </div>
-                                                    <div className="text-right">
-                                                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5 animate-pulse"></div>
-                                                            Active
+                                                    <div className="flex items-center justify-center">
+                                                        <span className="inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
+                                                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+                                                            New
                                                         </span>
                                                     </div>
                                                 </div>
-                                            </div>
 
-                                            <div className="p-6">
-                                                <h3 className="text-xl font-bold text-gray-900 mb-3 leading-tight group-hover:text-blue-600 transition-colors">
+                                                {/* Job Title */}
+                                                <h3 className="text-xl font-bold text-gray-900 mb-5 leading-tight line-clamp-2 group-hover:text-blue-600 transition-colors">
                                                     {job.jobTitle || 'Exciting Opportunity'}
                                                 </h3>
 
-                                                <p className="text-gray-600 mb-4 leading-relaxed line-clamp-2">
-                                                    {job.description
-                                                        ? job.description.split('\n')[0].substring(0, 100) + '...'
-                                                        : 'Join our team and make an impact with this exciting remote opportunity.'}
-                                                </p>
-
+                                                {/* Skills Tags */}
                                                 {job.skills && job.skills.length > 0 && (
                                                     <div className="flex flex-wrap gap-2 mb-6">
                                                         {job.skills.slice(0, 3).map((skill, skillIndex) => (
                                                             <span
                                                                 key={skillIndex}
-                                                                className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full font-medium hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                                                                className="px-3 py-1.5 bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 text-sm rounded-full font-medium border border-blue-100 hover:border-blue-200 transition-colors"
                                                             >
                                                                 {skill}
                                                             </span>
                                                         ))}
                                                         {job.skills.length > 3 && (
-                                                            <span className="px-3 py-1 bg-gray-50 text-gray-500 text-sm rounded-full font-medium">
+                                                            <span className="px-3 py-1.5 bg-gray-50 text-gray-500 text-sm rounded-full font-medium border border-gray-100">
                                                                 +{job.skills.length - 3} more
                                                             </span>
                                                         )}
                                                     </div>
                                                 )}
+                                            </div>
 
-                                                <div className="flex items-center justify-between mb-6 p-3 bg-gray-50 rounded-lg">
-                                                    <div className="flex items-center text-sm text-gray-600">
-                                                        <Calendar className="w-4 h-4 mr-2" />
-                                                        Posted recently
-                                                    </div>
-                                                    <div className="flex items-center text-sm text-gray-600">
-                                                        <Users className="w-4 h-4 mr-2" />
-                                                        {Math.floor(Math.random() * 50) + 5} applicants
-                                                    </div>
-                                                </div>
-
+                                            {/* Apply Button */}
+                                            <div className="px-7 pb-7 mt-auto">
                                                 <button
                                                     onClick={() => navigate(`/jobs/${job._id}`)}
-                                                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3.5 px-6 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/25 hover:-translate-y-0.5 flex items-center justify-center group/btn"
+                                                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 hover:shadow-lg text-white font-semibold py-3.5 px-6 rounded-xl transition-all duration-300 hover:-translate-y-0.5 flex items-center justify-center group/btn"
                                                 >
                                                     <span className="mr-2">Apply Now</span>
                                                     <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                                                 </button>
                                             </div>
-
-                                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
 
-                            <div className="text-center mt-12">
+                            <div className="text-center mt-16">
                                 <button
                                     onClick={() => navigate('/jobs')}
-                                    className="inline-flex items-center bg-white text-blue-600 font-semibold px-8 py-4 rounded-xl border-2 border-blue-200 hover:bg-blue-50 hover:border-blue-300 transition-all duration-300 hover:-translate-y-1 group"
+                                    className="inline-flex items-center bg-white text-blue-600 font-semibold px-8 py-4 rounded-xl border-2 border-blue-200 hover:bg-blue-50 hover:border-blue-300 transition-all duration-300 hover:-translate-y-1 shadow-lg group"
                                 >
                                     <span className="mr-2">View All Jobs</span>
                                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

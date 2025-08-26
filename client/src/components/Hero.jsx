@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Briefcase, Building2, Users, TrendingUp, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom'; // Add this import for navigation
 import heroImg from '../assets/heroo-img.png';
 
 // Counter animation component
@@ -45,7 +46,8 @@ const CountUp = ({ end, duration = 2000, suffix = '' }) => {
     );
 };
 
-const Hero = ({ onLocationChange }) => { // Add onLocationChange prop
+const Hero = ({ onLocationChange }) => {
+    const navigate = useNavigate(); // Hook for navigation
     const [jobTitle, setJobTitle] = useState('');
     const [location, setLocation] = useState('');
     const [isLoadingLocation, setIsLoadingLocation] = useState(false);
@@ -83,6 +85,40 @@ const Hero = ({ onLocationChange }) => { // Add onLocationChange prop
         const country = extractCountry(location);
         onLocationChange(country);
     }, [location, onLocationChange]);
+
+    // Handle search functionality
+    const handleSearch = (e) => {
+        e.preventDefault();
+
+        // Basic validation - only check for job title
+        if (!jobTitle.trim()) {
+            alert('Please enter a job title to search');
+            return;
+        }
+
+        // Create search parameters - only use job title for search
+        const searchParams = new URLSearchParams();
+        searchParams.set('search', jobTitle.trim());
+
+        // Navigate to jobs page with search parameters
+        navigate(`/jobs?${searchParams.toString()}`);
+    };
+
+    // Handle suggestion clicks
+    const handleSuggestionClick = (suggestion) => {
+        setJobTitle(suggestion);
+        // Trigger search immediately with the suggestion
+        const searchParams = new URLSearchParams();
+        searchParams.set('search', suggestion);
+        navigate(`/jobs?${searchParams.toString()}`);
+    };
+
+    // Handle Enter key press in input fields
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            handleSearch(e);
+        }
+    };
 
     // Get user's location
     const getUserLocation = async () => {
@@ -193,7 +229,7 @@ const Hero = ({ onLocationChange }) => { // Add onLocationChange prop
                         </div>
 
                         {/* Search Bar */}
-                        <div className="space-y-4">
+                        <form onSubmit={handleSearch} className="space-y-4">
                             <div className="bg-white border border-gray-200 rounded-2xl p-2 shadow-lg max-w-2xl hover:shadow-xl transition-shadow duration-300">
                                 <div className="flex flex-col sm:flex-row gap-2">
                                     <div className="flex-1 relative">
@@ -202,6 +238,7 @@ const Hero = ({ onLocationChange }) => { // Add onLocationChange prop
                                             placeholder="Job title, Keyword…"
                                             value={jobTitle}
                                             onChange={(e) => setJobTitle(e.target.value)}
+                                            onKeyPress={handleKeyPress}
                                             className="w-full px-4 py-3 text-gray-700 rounded-xl border-0 focus:outline-none bg-gray-50 focus:bg-white transition-colors duration-200"
                                         />
                                     </div>
@@ -218,11 +255,13 @@ const Hero = ({ onLocationChange }) => { // Add onLocationChange prop
                                             placeholder={isLoadingLocation ? 'Detecting location...' : 'Your Location'}
                                             value={location}
                                             onChange={(e) => setLocation(e.target.value)}
+                                            onKeyPress={handleKeyPress}
                                             onFocus={() => setShowLocationSuggestions(true)}
                                             onBlur={() => setTimeout(() => setShowLocationSuggestions(false), 200)}
                                             className="w-full pl-10 pr-10 py-3 text-gray-700 rounded-xl border-0 focus:outline-none bg-gray-50 focus:bg-white transition-colors duration-200"
                                         />
                                         <button
+                                            type="button"
                                             onClick={getUserLocation}
                                             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-600 hover:text-blue-700 transition-colors"
                                             title="Detect my location"
@@ -246,6 +285,7 @@ const Hero = ({ onLocationChange }) => { // Add onLocationChange prop
                                                         .map((city, index) => (
                                                             <button
                                                                 key={index}
+                                                                type="button"
                                                                 onClick={() => {
                                                                     setLocation(city);
                                                                     setShowLocationSuggestions(false);
@@ -259,7 +299,10 @@ const Hero = ({ onLocationChange }) => { // Add onLocationChange prop
                                             </div>
                                         )}
                                     </div>
-                                    <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold transition-colors duration-200 flex items-center gap-2">
+                                    <button
+                                        type="submit"
+                                        className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold transition-colors duration-200 flex items-center gap-2"
+                                    >
                                         <Search className="w-5 h-5" />
                                         Find Job
                                     </button>
@@ -269,14 +312,21 @@ const Hero = ({ onLocationChange }) => { // Add onLocationChange prop
                                 <span className="font-medium">Suggestion: </span>
                                 {suggestions.map((suggestion, index) => (
                                     <span key={index}>
-                                        <span className={suggestion === 'Digital Marketing' ? 'text-blue-600 font-medium' : ''}>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleSuggestionClick(suggestion)}
+                                            className={`hover:underline transition-colors ${suggestion === 'Digital Marketing'
+                                                    ? 'text-blue-600 font-medium hover:text-blue-700'
+                                                    : 'hover:text-gray-700'
+                                                }`}
+                                        >
                                             {suggestion}
-                                        </span>
+                                        </button>
                                         {index < suggestions.length - 1 && ', '}
                                     </span>
                                 ))}
                             </div>
-                        </div>
+                        </form>
                     </div>
 
                     {/* Right Side - Hero Image */}
