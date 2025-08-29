@@ -243,13 +243,6 @@ const Hero = ({ onLocationChange }) => {
                                         />
                                     </div>
                                     <div className="flex-1 relative">
-                                        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10">
-                                            {isLoadingLocation ? (
-                                                <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />
-                                            ) : (
-                                                <MapPin className="w-5 h-5 text-gray-400" />
-                                            )}
-                                        </div>
                                         <input
                                             type="text"
                                             placeholder={isLoadingLocation ? 'Detecting location...' : 'Your Location'}
@@ -258,7 +251,7 @@ const Hero = ({ onLocationChange }) => {
                                             onKeyPress={handleKeyPress}
                                             onFocus={() => setShowLocationSuggestions(true)}
                                             onBlur={() => setTimeout(() => setShowLocationSuggestions(false), 200)}
-                                            className="w-full pl-10 pr-10 py-3 text-gray-700 rounded-xl border-0 focus:outline-none bg-gray-50 focus:bg-white transition-colors duration-200"
+                                            className="w-full px-4 pr-10 py-3 text-gray-700 rounded-xl border-0 focus:outline-none bg-gray-50 focus:bg-white transition-colors duration-200"
                                         />
                                         <button
                                             type="button"
@@ -266,15 +259,19 @@ const Hero = ({ onLocationChange }) => {
                                             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-600 hover:text-blue-700 transition-colors"
                                             title="Detect my location"
                                         >
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth="2"
-                                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                                                />
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            </svg>
+                                            {isLoadingLocation ? (
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                            ) : (
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth="2"
+                                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                                    />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                </svg>
+                                            )}
                                         </button>
                                         {showLocationSuggestions && (
                                             <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-20 max-h-60 overflow-y-auto">
@@ -316,8 +313,8 @@ const Hero = ({ onLocationChange }) => {
                                             type="button"
                                             onClick={() => handleSuggestionClick(suggestion)}
                                             className={`hover:underline transition-colors ${suggestion === 'Digital Marketing'
-                                                    ? 'text-blue-600 font-medium hover:text-blue-700'
-                                                    : 'hover:text-gray-700'
+                                                ? 'text-blue-600 font-medium hover:text-blue-700'
+                                                : 'hover:text-gray-700'
                                                 }`}
                                         >
                                             {suggestion}

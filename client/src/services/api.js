@@ -74,12 +74,16 @@ export const getJobById = async (id) => {
 };
 
 // Get featured jobs by country
-export const getFeaturedJobs = async (country = '', limit = 4) => {
+export const getFeaturedJobs = async (country = '', limit = 6) => {
     try {
-        const response = await api.get('/featuredjobs', {
+        // Build the URL with country as a path parameter
+        const url = country
+            ? `/featuredjobs/${encodeURIComponent(country)}`
+            : '/featuredjobs';
+
+        const response = await api.get(url, {
             params: {
-                country: country || undefined,
-                limit,
+                limit, // Keep limit as query parameter if needed
             },
         });
         return response.data;

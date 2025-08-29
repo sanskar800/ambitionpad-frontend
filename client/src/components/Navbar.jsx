@@ -48,6 +48,12 @@ const Navbar = () => {
                         >
                             Browse Jobs
                         </Link>
+                        <Link
+                            to="/blogs"
+                            className="font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200"
+                        >
+                            Blogs
+                        </Link>
                     </div>
 
                     {/* Desktop CTA Button */}
@@ -122,6 +128,13 @@ const Navbar = () => {
                                     onClick={closeMenu}
                                 >
                                     Browse Jobs
+                                </Link>
+                                <Link
+                                    to="/blogs"
+                                    className="font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200 px-2 py-1"
+                                    onClick={closeMenu}
+                                >
+                                    Blogs
                                 </Link>
                                 <div className="pt-2">
                                     <button
