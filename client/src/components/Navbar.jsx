@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import Logo from '../assets/logo-ambition.png';
+import Logo from '../assets/Logo.png';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -27,7 +27,7 @@ const Navbar = () => {
                         <img
                             src={Logo}
                             alt="Ambition Pad Logo"
-                            className="w-8 h-8 sm:w-10 sm:h-10 object-cover rounded-full border border-gray-300"
+                            className="w-8 h-8 sm:w-10 sm:h-10 object-cover "
                         />
                         <span className="text-lg sm:text-xl font-bold text-gray-800">
                             Ambition Pad

@@ -313,7 +313,7 @@ const Home = () => {
                         {[
                             {
                                 step: '01',
-                                title: 'Create Your Profile',
+                                title: 'Join Our Talent Pool',
                                 desc: 'Build a compelling profile that showcases your skills, experience, and what makes you unique in the remote work landscape.',
                                 icon: Users,
                                 gradient: 'from-blue-500 to-cyan-500',

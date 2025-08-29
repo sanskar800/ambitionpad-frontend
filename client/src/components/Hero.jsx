@@ -68,9 +68,9 @@ const Hero = ({ onLocationChange }) => {
 
     const stats = [
         { icon: Briefcase, label: 'Live Job', count: 5000, suffix: '+' },
-        { icon: Building2, label: 'Companies', count: 300, suffix: '+' },
+        { icon: Building2, label: 'Companies', count: 100, suffix: '+' },
         { icon: Users, label: 'Candidates', count: 3000, suffix: '+' },
-        { icon: TrendingUp, label: 'New Jobs', count: 2200, suffix: '' },
+        { icon: TrendingUp, label: 'New Jobs', count: 1500, suffix: '' },
     ];
 
     // Function to extract country from location string
@@ -224,7 +224,7 @@ const Hero = ({ onLocationChange }) => {
                                 Find a job that suits your interest & skills.
                             </h1>
                             <p className="text-lg text-gray-600 leading-relaxed max-w-lg">
-                                Aliquam vitae turpis in diam convallis finibus in at risus. Nullam in scelerisque leo, eget sollicitudin velit bestibulum.
+                                Find remote jobs, research remote companies, and apply for jobs—all for free.
                             </p>
                         </div>
 
